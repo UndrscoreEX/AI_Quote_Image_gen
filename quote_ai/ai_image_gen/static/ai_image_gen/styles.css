@@ -1,0 +1,31 @@
+body {
+    background-image: linear-gradient(
+  45deg,
+  hsl(240deg 18% 36%) 0%,
+  hsl(240deg 18% 32%) 11%,
+  hsl(240deg 18% 28%) 22%,
+  hsl(240deg 18% 24%) 33%,
+  hsl(240deg 18% 20%) 44%,
+  hsl(240deg 17% 16%) 56%,
+  hsl(240deg 18% 12%) 67%,
+  hsl(240deg 17% 8%) 78%,
+  hsl(240deg 20% 4%) 89%,
+  hsl(0deg 0% 0%) 100%
+);
+}
+
+h1 {
+    color: antiquewhite;
+}
+
+.tag {
+    background-color: tomato;
+}
+
+.found {
+    color: green !important;
+}
+
+.n_found {
+    color: red !important;
+}
