@@ -1,35 +1,121 @@
+
 const app = Vue.createApp({
     data() {
       return {
         includes: false,
-        // add all the tag keys here:ß
-        search_list : 'nothing so far',
+        search_list : [],
+        search_list_str: null,
+        search : '',
+        img_tags: null,
+        filtered_lists : ''
 
       }
     },
-    watch: {
-        search(newVal, oldVal) {
-        //   console.log(`New message: ${newVal}. Old message: ${oldVal}.`)
-          if (this.search_list.includes(' '+newVal)){
-            this.includes = true
-            console.log(` included `, this.includes)
 
+    computed:{
+      // filtered_lists(){
+      //   const searchTerm = this.search.trim().toLowerCase();
+      //   return this.search_list.filter((tag) =>
+      //   tag.toLowerCase().includes(searchTerm))
+      // }
+      
+    },
+    watch: {
+        search(newVal) {
+          if (this.search_list_str.includes(' '+newVal)){
+            this.includes = true
           }
+
           else{
             this.includes = false
             console.log(` not included `, this.includes)
 
           }
-        }},
-    mounted(){
-      console.log('got this far')
-      this.search_list = document.getElementById('theme_tag_results_raw').textContent
-    }
-  })
+          const searchTerm = this.search.trim().toLowerCase();
+          this.filtered_lists = this.search_list.filter((tag) =>
+          tag.toLowerCase().includes(searchTerm))
+          console.log(this.filtered_lists)
+        },
+        
+      
+      },
+        
+        // when vue is launched
+        created() {
+          
+          
+          
+        },
+
+        // when vue is mounted
+        mounted(){
+          // collected all theme tags to be referenced in the search bar -- unnessary now that I get it from the initial websocket request. 
+          this.search_list_str = document.getElementById('theme_tag_results_raw').textContent
+          this.search_list = this.search_list_str.split(', ')
+
+
+          let url = `ws://${window.location.host}/ws/socket-server/`
+          const feedSocket = new WebSocket(url)
+
+          let form = document.getElementById('form')
+          
+          form.addEventListener('submit', (e)=>{
+              e.preventDefault()
+              let message = e.target.elements['search_bar'].value
+              console.log(message)
+              // validate that the imput is right
+              feedSocket.send(JSON.stringify({
+                'message':message
+              }))
+            form.reset()
+          })
+          
+          
+          // must be arrow function to get access to the vue object
+          feedSocket.onmessage = (e)=> {
+            data = JSON.parse(e.data)
+            console.log('websocket message',data)
+
+            // initial connection:
+            if (data.type){
+              if (data.type == 'DB_Success'){
+                console.log('db_connection successful')
+              }
+              else if (data.type == 'DB_fail'){
+                console.log('db_connection failed')
+              }
+            }
+
+            // on return:
+            if (data.source){
+                if (data.source == 'fail'){
+                  this.img_tags = 'search query failed'
+                }
+                else if (data.source == 'search'){
+                  this.img_tags= data.message.join(', ')
+                }
+            }
+          }
+        },
+})
 
 
 
 
-  
-  app.config.compilerOptions.delimiters = ['$[', ']'];
-  app.mount('#app')
+
+app.config.compilerOptions.delimiters = ['$[', ']'];
+app.mount('#app')
+
+
+
+
+
+
+
+// To do:
+// Get the filtered tag feed to work
+// add nore records, 
+// on consumers, try for the db querie otherwise return a failed attempt json (otherwise websocket crashes)
+// add post mthod with validation, CSRF validation through websocket 
+// loading screen, 
+// showing the available themes as you type 
