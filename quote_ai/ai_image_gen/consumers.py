@@ -10,19 +10,18 @@ class FeedConsumer(WebsocketConsumer):
 
     def connect(self):
         self.accept()
-        # try:
-        all_theme_tags = [x.name for x in DB_interactions.tags.all()]
-        print(all_theme_tags)
-        self.send(text_data=json.dumps({
-            'type': 'DB_Success',
-            'message': all_theme_tags,
-            
-        }))
-        print('aslkfj;alskjfsad',all_theme_tags)
-        # except:
-        #     self.send(text_data=json.dumps({
-        #         'type': 'DB_fail',
-        #     }))
+        try:
+            all_theme_tags = [x.name for x in DB_interactions.tags.all()]
+            print(all_theme_tags)
+            self.send(text_data=json.dumps({
+                'type': 'DB_Success',
+                'message': all_theme_tags,
+                
+            }))
+        except:
+            self.send(text_data=json.dumps({
+                'type': 'DB_fail',
+            }))
 
     # def disconnect(self, close_code):
     #     pass

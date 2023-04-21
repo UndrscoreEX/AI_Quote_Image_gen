@@ -22,19 +22,21 @@
 
             </form>
             <div>
-                <h1 :class="{ n_found: !includes, found: includes,  }" >$[search]</h1>
+                <h1 v-if="search" :class="{ n_found: !includes, found: includes,  }" > $[search]</h1>
+                <h1 v-else>Start searching</h1>
             </div>
 
-            <div v-if="filtered_list">
-                <div v-for="tag in filtered_list" :key="tag">
-                    <p>
-                        $[tag]  
-                    </p>
-
+            <div class="container">
+                <div v-if="filtered_lists">
+                    <div class="row justify-content-md-center">
+                        <div v-for="tag in filtered_lists" class="col-md-3 card">
+                            <p class="card-header">
+                                $[tag]  
+                            </p>
+                        </div>
+                    </div>  
                 </div>
-
             </div>
-            
         </div>
         
         
