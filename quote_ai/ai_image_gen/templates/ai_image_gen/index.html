@@ -29,12 +29,29 @@
             <div class="container">
                 <div v-if="filtered_lists">
                     <div class="row justify-content-md-center">
-                        <div v-for="tag in filtered_lists" class="col-md-3 card">
-                            <p class="card-header">
+                        <div v-for="tag in filtered_lists" class="d-flex col-md-2 card mx-2">
+                            <p class="card-header ">
                                 $[tag]  
                             </p>
                         </div>
                     </div>  
+                </div>
+            </div>
+            <!-- loading -->
+            <div v-if="loading">
+                <img src="{% static '/loading.gif' %}">
+
+            </div>
+            <div v-if="some_response">
+                <div v-if="error_message">
+                    <p class="">$[error_message]</p>
+                    
+                </div>
+                <div v-else>
+                    <!-- <img src="$[ img_path ]" alt=""> -->
+                    <img class="w-100" src="{% static '/testimage.jpeg' %}" alt="">
+                    
+                    <p>$[ img_path ]</p>
                 </div>
             </div>
         </div>

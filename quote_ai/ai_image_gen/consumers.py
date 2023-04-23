@@ -37,10 +37,30 @@ class FeedConsumer(WebsocketConsumer):
             img_tags_to_focus_on = random.choice(associated_quote_list).image_tag.all()
             print([x.name for x in img_tags_to_focus_on])
 
-            self.send(text_data=json.dumps({
-                'source' : 'search',
-                'message' : [x.name for x in img_tags_to_focus_on]
+            # request to dahlia api
+
+            # test ones
+            req = True
+            test_path = 'testimage.jpeg'
+
+
+            if req:
+                print('simulated succesful request')
+                self.send(text_data=json.dumps({
+                    'source' : 'search',
+                    'message' : [x.name for x in img_tags_to_focus_on],
+                    'result' : test_path,
+                }))
+
+            # if db search was successful but the api didn't give a successful image back 
+            else:
+                print('simulated failed request')
+                self.send(text_data=json.dumps({
+                    'source' : 'search',
+                    'message' : [x.name for x in img_tags_to_focus_on],
+                    'result' : 'fail',
             }))
+
         except:
             self.send(text_data=json.dumps({
                 'source' : 'fail'

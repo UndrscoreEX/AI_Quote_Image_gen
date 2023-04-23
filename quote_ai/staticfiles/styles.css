@@ -1,6 +1,23 @@
 body {
-    background-color: black;
+    background-color: rgb(61, 57, 57);
 }
+
 h1 {
     color: antiquewhite;
+}
+
+p {
+    color: antiquewhite;
+}
+
+.tag {
+    background-color: tomato;
+}
+
+.found {
+    color: green !important;
+}
+
+.n_found {
+    color: red !important;
 }
