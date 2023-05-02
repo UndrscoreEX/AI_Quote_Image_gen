@@ -25,8 +25,12 @@ const app = Vue.createApp({
       }
     },
 
-    // computed:{
-    // },
+    computed:{
+      // randomizedFilteredLists() {
+      //   const shuffled = this.filtered_lists.sort(() => .5 - Math.random());
+      //   return shuffled.slice(0, 5);
+      // }
+    },
 
     watch: {
         search(newVal) {
@@ -40,10 +44,11 @@ const app = Vue.createApp({
           }
 
           // updates of the filtered_lists field. Probably could be added to the computed field but this had a few problems. 
-          const searchTerm = this.search.trim().toLowerCase();
+          let searchTerm = this.search.trim().toLowerCase();
           this.filtered_lists = this.search_list.filter((tag) =>
           tag.toLowerCase().includes(searchTerm))
-          this.filtered_lists = this.filtered_lists
+          // randomize the results
+          this.filtered_lists = this.filtered_lists.sort(() => .5 - Math.random())
           console.log(this.filtered_lists)
         },
         
@@ -87,9 +92,10 @@ const app = Vue.createApp({
                 console.log('db_connection successful')
 
                 // populating the fields at the start
-                this.filtered_lists = data.message
                 this.search_list = data.message
                 this.search_list_str = ' '+data.message.join(' ')
+                // randomize the results
+                this.filtered_lists = data.message.sort(() => .5 - Math.random())
 
               }
               else if (data.type == 'DB_fail'){
@@ -175,11 +181,10 @@ app.mount('#app')
 
 
 // To do:
-// add more records, 
-// add options for Japanese language ones. 
-// give 3-5 suggestions of kw that can be clicked. Give option for a random search
+// add options for Japanese language ones.
 // validate the input to avoid XSS
 // add post mthod with validation, CSRF validation through websocket 
 // figure out the dall e api
 // add the 'salt' . i.e 'A dramatic picture that includes the themes of:', 'A pixel art scene of' , 'a scene from a 
 // Find how to limit the cookies to 2 picture and count how many have been made
+// clean up the websocket checks. don't go so deep, add check functions or unify the data.type and data.source property. 

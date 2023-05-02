@@ -51,7 +51,7 @@ class FeedConsumer(WebsocketConsumer):
             # messages is chosen theme
 
             book = random_option.book.name
-            themes = ','.join([x.name for x in random_option.theme_tag.all()])
+            themes = ', '.join([x.name for x in random_option.theme_tag.all()])
             author = random_option.book.author
             quote = random_option.text
             print(author,book, themes, quote)
@@ -64,7 +64,7 @@ class FeedConsumer(WebsocketConsumer):
                 'all_themes' : themes,
                 'book' : book,
                 'author' : author,
-                'img_tags' : [x.name for x in img_tags_to_focus_on],
+                'img_tags' : ', '.join([x.name for x in img_tags_to_focus_on]),
                 'quote': quote
             }
             info = json.dumps(info_from_db)
