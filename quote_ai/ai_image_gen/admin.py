@@ -4,7 +4,8 @@ from .models import Quotes, Theme_tags, Image_tags, Book
 
 @admin.register(Quotes)
 class  Quote_class(admin.ModelAdmin):
-    list_display = ['text','source']
+    list_display = ['text','book',]
+    # list_display = [f.name for f in Book._meta.fields]
 
 @admin.register(Theme_tags)
 class  Theme_tag_class(admin.ModelAdmin):
@@ -16,4 +17,4 @@ class  Image_tag_class(admin.ModelAdmin):
 
 @admin.register(Book)
 class  Book_class(admin.ModelAdmin):
-    list_display = ['name','author','quote']
+    list_display = ['name','author']

@@ -32,7 +32,6 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'channels',
-
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -142,4 +141,3 @@ STATICFILES_DIRS = [
     BASE_DIR / 'ai_image_gen/static/ai_image_gen/'
 ]
 
-print(STATIC_ROOT, STATICFILES_DIRS)

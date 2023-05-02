@@ -24,6 +24,6 @@ application = ProtocolTypeRouter({
                 ai_image_gen.routing.websocket_urlpatterns
             )   
     )
-})
+})  
 
 # Fix this and figure out how to use this with Mysql. That is the poblem so far. `________
