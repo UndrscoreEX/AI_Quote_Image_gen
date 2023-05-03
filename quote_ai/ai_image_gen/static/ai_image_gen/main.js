@@ -1,4 +1,4 @@
-
+// import DOMPurify from 'dompurify';
 const app = Vue.createApp({
     data() {
       return {
@@ -113,7 +113,10 @@ const app = Vue.createApp({
                 this.cur_book = data.query_content.book
 
                 // ||||||||||||||||| need to use v-html to make this run as html, but you need to sanitize it first. Use dompurifier. check chatgpt chat
-                this.cur_quote = data.query_content.quote.replace('\n', '<br>')
+                this.cur_quote = DOMPurify.sanitize(data.query_content.quote, {
+                  ALLOWED_TAGS: ['br'],
+                  // ALLOWED_ATTR: []
+                });
                 this.cur_theme_tag = data.query_content.all_themes
                 this.cur_chosen_theme_tag = data.query_content.chosen_theme
                 this.cur_image_tag = data.query_content.img_tags
