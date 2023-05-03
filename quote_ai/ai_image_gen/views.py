@@ -8,16 +8,16 @@ from .db_interactions import DB_interactions
 # Create your views here.
 class Home_page(View):
     def get(self,request):
-        # request.session
-        # setting session limit:
-        # It will then be collected through the scope on the consumers.py side
 
-        if not request.session.__contains__('submissions'):
-            request.session.__setitem__('submissions', 3)
-            print('no sessions')
-        else:
+        print('checking sessions at the start: ',  request.session.session_key, request.session['submissions'] )
+        if request.session.__contains__('submissions'):
             print('previous session')
-            print(request.session.get('submissions'))
+            print('views, remaining tokens =',request.session.get('submissions'))
+        else:
+            request.session['submissions'] = 3
+            # print('no sessions')
+            request.session.save()
+            # print('Session saved. Session ID:', request.session.session_key)
 
         # request.session.save()　　＝＝ use when we add our redis cache layer
         submissions = request.session.__getitem__('submissions')
@@ -27,6 +27,7 @@ class Home_page(View):
         theme_tags_for_search = [x[0] for x in theme_tags_for_search.values_list("name")]
         # print(theme_tags_for_search)
 
+        print('checking sessions after initial check: ',  request.session.session_key, request.session['submissions'] )
 
         return render(request,'index.html',{
             'theme_tag_results_raw':", ".join(theme_tags_for_search),

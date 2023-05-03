@@ -2,20 +2,39 @@ import json
 from channels.generic.websocket import WebsocketConsumer
 from .db_interactions import DB_interactions , submissions_check
 import random
+from django.contrib.sessions.backends.db import SessionStore
+
+
+# async def sessions_update(message):
+#     session_key = message.http_session.session_key
+#     session_data = cache.get(session_key)
+
+
 
 
 class FeedConsumer(WebsocketConsumer):
+
+
     def connect(self):
         self.accept()
-
         session_submissions = self.scope["session"].get('submissions')
-        print(session_submissions)
-        
+        sess_key = self.scope["session"].session_key
+        session_object = SessionStore(session_key=sess_key)
+        session_object.load()
+
+        print('on connection, the session object should look like this: ', session_object)
+
+
+        print('testing if the save actually fucking works')
+        session_object['submissions'] = 5
+        session_object.save()
+        print(session_object.get('submissions'))
+
+
         # This will not work if there is multiple servers. You will need to get a redis DB for a cache layer and query this each time. 
 
         try:
             all_theme_tags = [x.name for x in DB_interactions.tags.all()]
-            print(all_theme_tags)
             self.send(text_data=json.dumps({
                 'type': 'DB_Success',
                 'message': all_theme_tags,
@@ -31,9 +50,15 @@ class FeedConsumer(WebsocketConsumer):
 
     def receive(self, text_data):
 
-        # can this be edited in browser? Not important for this project, but ill need to use a redis cache layer in a full production. 
-        session_submissions = self.scope["session"].get('submissions')
-        print('sessions found ==',session_submissions)
+        sess_key = self.scope["session"].session_key
+        session_object = SessionStore(session_key=sess_key)
+        session_object.load()
+        print('upon receiving websocket request, the session object should look like this: ', session_object)
+
+        session_submissions = self.scope["session"].get('submissions') 
+        print('sessions found from the old scope way ==',session_submissions)
+        print('sessions found from new SessionObject way ==',session_object['submissions'])
+
 
         text_data_json = json.loads(text_data)
         message = text_data_json['message']
@@ -47,17 +72,14 @@ class FeedConsumer(WebsocketConsumer):
             img_tags_to_focus_on = random_option.image_tag.all()
 
 
-            #other info about the record 
-            # messages is chosen theme
-
             book = random_option.book.name
             themes = ', '.join([x.name for x in random_option.theme_tag.all()])
             author = random_option.book.author
             quote = random_option.text
-            print(author,book, themes, quote)
             img_tags = [x.name for x in img_tags_to_focus_on]
+            # print(author,book, themes, quote)
         
-            # print(dir(random_option),'afsadfdsafsdjkhfkldsaj')
+
             print('image tags to be used', img_tags)
             info_from_db = {
                 'chosen_theme' : message,
@@ -67,8 +89,8 @@ class FeedConsumer(WebsocketConsumer):
                 'img_tags' : ', '.join([x.name for x in img_tags_to_focus_on]),
                 'quote': quote
             }
-            info = json.dumps(info_from_db)
-            print(info)
+
+
             if submissions_check(session_submissions):  
                 #¥¥¥¥¥¥¥¥ request to dahlia api
 
@@ -78,7 +100,11 @@ class FeedConsumer(WebsocketConsumer):
 
                 session_submissions -= 1
                 self.scope["session"]['submissions'] = session_submissions
-                print(self.scope["session"]['submissions'])
+                session_object['submissions'] = session_submissions
+                session_object.save()
+
+                # print('after saving the new submission numbers :', session_object_contents['submissions'])
+                # print('', self.scope["session"]['submissions'])
 
                 if req:
                     print('simulated succesful request')
@@ -93,16 +119,17 @@ class FeedConsumer(WebsocketConsumer):
 
                 # if db search was successful but the api didn't give a successful image back 
                 else:
-                    print('simulated failed request')
+                    print('simulated failed api request')
                     self.send(text_data=json.dumps({
                         'source' : 'search',
                         'message' : [x.name for x in img_tags_to_focus_on],
                         'result' : 'db_fail',
                         'query_content' : info_from_db
                 }))
-                
+                    
+            # if db search was successful but the tokens are insufficient
             else:
-                print('simulated failed request')
+                print('simulated failed request due to tokens')
                 self.send(text_data=json.dumps({
                     'source' : 'search',
                     'message' : [x.name for x in img_tags_to_focus_on],
@@ -110,8 +137,10 @@ class FeedConsumer(WebsocketConsumer):
                     'query_content' : info_from_db,
 
             }))
-
+       
+        # if db search was unsuccessful
         except:
+            print('DB query failure')
             self.send(text_data=json.dumps({
                 'source' : 'fail'
             }))
