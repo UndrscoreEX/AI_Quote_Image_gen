@@ -181,5 +181,8 @@ app.mount('#app')
 
 // To do:
 // add options for Japanese language ones.
+// loading gif isnt working
+// new isolated model with 'salt'
 // add post mthod with validation, CSRF validation through websocket 
 // add the 'salt' . i.e 'A dramatic picture that includes the themes of:', 'A pixel art scene of' , 'a scene from a 
+// make it look better
