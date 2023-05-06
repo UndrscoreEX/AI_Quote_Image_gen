@@ -2,7 +2,7 @@ body {
     background-color: rgb(61, 57, 57);
 }
 
-h1 {
+.title {
     color: antiquewhite;
 }
 
@@ -20,4 +20,8 @@ p {
 
 .n_found {
     color: red !important;
+}
+
+.btn-primary:hover{
+    color: rgb(127, 31, 31) !important;
 }

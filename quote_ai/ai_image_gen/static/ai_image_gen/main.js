@@ -1,4 +1,3 @@
-// import DOMPurify from 'dompurify';
 const app = Vue.createApp({
     data() {
       return {
@@ -20,16 +19,14 @@ const app = Vue.createApp({
         cur_quote : null,
         cur_theme_tag: null,
         cur_chosen_theme_tag : null ,
-        cur_image_tag : null
+        cur_image_tag : null,
+        dall_e_image : null,
 
       }
     },
 
     computed:{
-      // randomizedFilteredLists() {
-      //   const shuffled = this.filtered_lists.sort(() => .5 - Math.random());
-      //   return shuffled.slice(0, 5);
-      // }
+     
     },
 
     watch: {
@@ -43,23 +40,20 @@ const app = Vue.createApp({
             console.log(` not included `, this.includes)
           }
 
-          // updates of the filtered_lists field. Probably could be added to the computed field but this had a few problems. 
+          // :: updates of the filtered_lists field. Probably could be added to the computed field but this had a few problems. 
           let searchTerm = this.search.trim().toLowerCase();
           this.filtered_lists = this.search_list.filter((tag) =>
           tag.toLowerCase().includes(searchTerm))
-          // randomize the results
+
+          // :: randomize the results
           this.filtered_lists = this.filtered_lists.sort(() => .5 - Math.random())
-          console.log(this.filtered_lists)
+          console.log('key pressed, this is the list associated with the string so far: ',this.filtered_lists)
         },
         
       
       },
         
-        // when vue is launched
-        // created() {
-        // },
-
-        // when vue is mounted
+        // :: when vue is mounted
         mounted(){
           let url = `ws://${window.location.host}/ws/socket-server/`
           this.feedSocket = new WebSocket(url)     
@@ -69,95 +63,97 @@ const app = Vue.createApp({
             e.preventDefault()
             this.some_response = false
             let message = e.target.elements['search_bar'].value
-            console.log(message)
-              // validate that the imput is right
+            console.log('message that is sent up to the consumer: ',message)
               this.feedSocket.send(JSON.stringify({
                 'message':message
               }))
             form.reset()
+
+            // :: start the loading gif
             this.loading = true
+
           })
           
           
-          // must be arrow function to get access to the vue object (this.)
+          // :: must be arrow function to get access to the vue object (this.)
           this.feedSocket.onmessage = (e)=> {
             data = JSON.parse(e.data)
             console.log('websocket message',data)
 
-            // initial connection:
-            // type field is only used for DB success/fail control
-            if (data.type){
-              if (data.type == 'DB_Success'){
+            // :: initial connection:
+            // :: type field is only used/checked for DB success/fail control
+              if (data.type && data.type == 'DB_Success'){
                 this.submissions_remaining = data.submissions_left
                 console.log('db_connection successful')
 
-                // populating the fields at the start
+                // :: populating the fields at the start
                 this.search_list = data.message
                 this.search_list_str = ' '+data.message.join(' ')
-                // randomize the results
+                // :: randomize the results
                 this.filtered_lists = data.message.sort(() => .5 - Math.random())
 
               }
-              else if (data.type == 'DB_fail'){
-                // *****************
-                // maybe add a message for the render to report this
+              else if (data.type && data.type == 'DB_fail'){
+                this.error_message = 'initial DB_connection failed'
                 console.log('db_connection failed')
               }
-            }
 
-            // on response from form request:
-            if (data.source){
-              if (data.source == 'search'){
+            // :: on response from form request:
+            if (data.source && data.source == 'search'){
                 this.img_tags= data.message.join(', ')
 
                 this.cur_book = data.query_content.book
 
-                // ||||||||||||||||| need to use v-html to make this run as html, but you need to sanitize it first. Use dompurifier. check chatgpt chat
+                // :: Sanitizing the quote that I get from the DB to allow the <br> tags to take effect.
+                // :: connects with the v-html tag in the render
                 this.cur_quote = DOMPurify.sanitize(data.query_content.quote, {
                   ALLOWED_TAGS: ['br'],
-                  // ALLOWED_ATTR: []
                 });
+
                 this.cur_theme_tag = data.query_content.all_themes
                 this.cur_chosen_theme_tag = data.query_content.chosen_theme
                 this.cur_image_tag = data.query_content.img_tags
-
                 console.log(this.cur_quote)
-                // if we got a result from the api
-                if (data.result){
-                  this.some_response = true
+                
+                // :: if we got a result from the api
+                if (data.result) {
+                  switch (data.result) {
+                    case 'db_fail':
+                      this.some_response = true
+                      this.error_message = 'request failed'
+                      break
+                    case 'insf_tokens':
+                      this.some_response = true
+                      this.error_message = 'no tokens left'
+                      break
+                    default:
+                      this.some_response = true
+                      this.img_path = data.result
+                      this.dall_e_image = data.dall_e_image
+                      this.submissions_remaining = data.submissions_left
+                      this.loading = false
 
-                  // if the DB query worked but the api response was bad
-                  if (data.result == 'db_fail'){
-                    this.error_message = 'request failed'
+                      break
                   }
-                  // if the DB query worked but there are no tokens left
-                  else if (data.result == 'insf_tokens'){
-                    this.error_message = 'no tokens left'
 
-                  }
-
-                  // if it worked as expected
-                  else{
-                    this.img_path = data.result
-                    this.submissions_remaining = data.submissions_left
-                  }
-
-                  this.loading = false
-                  console.log('received')
+                  // :: end the loading gif because a responsse was obtained 
+                  // this.loading = false
 
                 }
+                
               }
 
-              // if internal DB search failed
-              else if (data.source == 'fail'){
+              // :: if internal DB search failed
+              else if (data.source && data.source == 'fail'){
                 this.loading = false
                 this.img_tags = 'search query failed'
               }
-            }
+            // }
 
 
           }
         },
+
         methods : {
           search_keyword(kw){
             console.log('sending', kw)
@@ -170,7 +166,7 @@ const app = Vue.createApp({
         }
 })
 
-
+// global.vm = app;
 
 
 
@@ -185,9 +181,5 @@ app.mount('#app')
 
 // To do:
 // add options for Japanese language ones.
-// validate the input to avoid XSS
 // add post mthod with validation, CSRF validation through websocket 
-// figure out the dall e api
 // add the 'salt' . i.e 'A dramatic picture that includes the themes of:', 'A pixel art scene of' , 'a scene from a 
-// Find how to limit the cookies to 2 picture and count how many have been made
-// clean up the websocket checks. don't go so deep, add check functions or unify the data.type and data.source property. 

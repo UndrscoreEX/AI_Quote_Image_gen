@@ -3,11 +3,9 @@ from channels.generic.websocket import WebsocketConsumer
 from .db_interactions import DB_interactions , submissions_check
 import random
 from django.contrib.sessions.backends.db import SessionStore
-
-
-# async def sessions_update(message):
-#     session_key = message.http_session.session_key
-#     session_data = cache.get(session_key)
+import openai
+import os
+openai.api_key = os.getenv('OPEN_AI_Secret_Key')
 
 
 
@@ -92,7 +90,17 @@ class FeedConsumer(WebsocketConsumer):
 
 
             if submissions_check(session_submissions):  
-                #¥¥¥¥¥¥¥¥ request to dahlia api
+
+                # test that the Dall-e Api works:
+                # It works!!!
+                # joined_img_tags = ', '.join(img_tags)
+                # response = openai.Image.create(
+                #     prompt=f'create an an image with the themes of {joined_img_tags} in the style of pixel art',
+                #     n=1,
+                #     size="256x256",
+                # )
+                # dall_e_image = response["data"][0]["url"]
+                # print(dall_e_image)
 
                 # test ones
                 req = True
@@ -113,7 +121,8 @@ class FeedConsumer(WebsocketConsumer):
                         'message' : img_tags,
                         'result' : test_path,
                         'submissions_left' : session_submissions,
-                        'query_content' : info_from_db
+                        'query_content' : info_from_db,
+                        # 'dall_e_image' : dall_e_image
 
                     }))
 
@@ -139,7 +148,8 @@ class FeedConsumer(WebsocketConsumer):
             }))
        
         # if db search was unsuccessful
-        except:
+        except Exception as e:
+            print(e)
             print('DB query failure')
             self.send(text_data=json.dumps({
                 'source' : 'fail'

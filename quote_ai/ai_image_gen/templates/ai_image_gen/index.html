@@ -18,22 +18,22 @@
     <div id="app">
         <div class="pt-5 container mx-auto my-auto text-center">
 
-            <h1>AI Image Generator</h1>
+            <h1 class="title">AI Image Generator</h1>
             <form id="form">
                 {{ csrf_validation }}
                 <input placeholder='try it out' type="text" v-model="search" name="search_bar">
 
             </form>
             <div>
-                <h1 v-if="search" :class="{ n_found: !includes, found: includes,  }"> $[search]</h1>
-                <h1 v-else>Start searching</h1>
+                <h1 v-if="search" :class="{ n_found: !includes, found: includes,  }" class="title"> $[search]</h1>
+                <h1 v-else class="title">Start searching</h1>
             </div>
 
             <div class="container" style="height:100px">
                 <div v-if="filtered_lists">
                     <div class="row justify-content-md-center ">
-                        <div v-for="tag in filtered_lists.slice(0,5)" class="d-flex col-md-2 card mx-2">
-                            <a @click="search_keyword(tag)" class="card-header " style="text-transform: capitalize">
+                        <div v-for="tag in filtered_lists.slice(0,5)" class="d-flex col-md-2 card  mx-2">
+                            <a @click="search_keyword(tag)" class="btn-primary " style="text-transform: capitalize; text-decoration: none;">
                                 $[tag]
                             </a>
                         </div>
@@ -45,6 +45,8 @@
         <!-- loading -->
 
         <div class="container mx-auto text-center">
+            <!-- <img src="https://oaidalleapiprodscus.blob.core.windows.net/private/org-OqouMzKmPZrpejBBfCPRkGLo/user-YFH8KEPWsZGLg0quXyghK8w9/img-FRNFjtXqzorH75d0jZUjnHNt.png?st=2023-05-06T04%3A21%3A49Z&se=2023-05-06T06%3A21%3A49Z&sp=r&sv=2021-08-06&sr=b&rscd=inline&rsct=image/png&skoid=6aaadede-4fb3-4698-a8f6-684d7786b067&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2023-05-06T00%3A42%3A29Z&ske=2023-05-07T00%3A42%3A29Z&sks=b&skv=2021-08-06&sig=np2V7zDnvz/JGIIlB5zQnNCMTxEFHO/HzCY/KkAac2k%3D"> -->
+
 
             <div v-if="loading">
                 <img src="{% static '/loading.gif' %}">
@@ -54,28 +56,42 @@
                     <p class="">$[error_message]</p>
 
                 </div>
+
                 <div v-else>
                     <!-- <img src="$[ img_path ]" alt=""> -->
                     <img class="w-25" src="{% static '/testimage.jpeg' %}" alt="">
 
                     <p>$[ img_path ]</p>
+
+                    <h1> generated image </h1>
+                    <!-- <img src="$[dall_e_image]"> -->
+                    <img :src="dall_e_image">
+                    <!-- <img src="https://oaidalleapiprodscus.blob.core.windows.net/private/org-OqouMzKmPZrpejBBfCPRkGLo/user-YFH8KEPWsZGLg0quXyghK8w9/img-FRNFjtXqzorH75d0jZUjnHNt.png?st=2023-05-06T04%3A21%3A49Z&se=2023-05-06T06%3A21%3A49Z&sp=r&sv=2021-08-06&sr=b&rscd=inline&rsct=image/png&skoid=6aaadede-4fb3-4698-a8f6-684d7786b067&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2023-05-06T00%3A42%3A29Z&ske=2023-05-07T00%3A42%3A29Z&sks=b&skv=2021-08-06&sig=np2V7zDnvz/JGIIlB5zQnNCMTxEFHO/HzCY/KkAac2k%3D"> -->
+
+                    <p></p>
                 </div>
             </div>
         </div>
         
         <div class="container mx-auto">
-            <div v-if="cur_book">
-                <h1>
-                    $[cur_book]
-                </h1>
-                <p>chosen tag : $[cur_chosen_theme_tag] </p>
-                <h3 v-html="cur_quote"></h3>
-                <p>themes: $[cur_theme_tag] </p>
-                <p>image tags: $[cur_image_tag]</p>
-                </p>
-    
-    
+            <div class="card mx-auto w-75">
+                <div>
+
+                    <div v-if="cur_book">
+                        <div class="card-header">
+                            <h1>
+                                $[cur_book]
+                            </h1>
+                        </div>
+                        <div class="card-inner w-75 mx-auto">
+                            <p>chosen tag : $[cur_chosen_theme_tag] </p>
+                            <h3 v-html="cur_quote"></h3>
+                            <p>themes: $[cur_theme_tag] </p>
+                            <p>image tags: $[cur_image_tag]</p>                    
+                        </div>
+                </div>
             </div>
+        </div>
             <!-- 
             <div id="theme_tag_results_raw">
                 <p>
