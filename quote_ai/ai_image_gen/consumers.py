@@ -12,6 +12,7 @@ openai.api_key = os.getenv('OPEN_AI_Secret_Key')
 
 class FeedConsumer(WebsocketConsumer):
 
+    FULL_TEXT = True
 
     def connect(self):
         self.accept()
@@ -28,9 +29,7 @@ class FeedConsumer(WebsocketConsumer):
         session_object.save()
         print(session_object.get('submissions'))
 
-
         # This will not work if there is multiple servers. You will need to get a redis DB for a cache layer and query this each time. 
-
         try:
             all_theme_tags = [x.name for x in DB_interactions.tags.all()]
             self.send(text_data=json.dumps({
@@ -61,6 +60,9 @@ class FeedConsumer(WebsocketConsumer):
         text_data_json = json.loads(text_data)
         message = text_data_json['message']
 
+        salt = DB_interactions.get_salt()
+
+
         try:
             theme_tags = DB_interactions.get_image_tags(theme_tags=message)
             associated_quote_list= theme_tags.quotes_set.all()
@@ -77,6 +79,7 @@ class FeedConsumer(WebsocketConsumer):
             img_tags = [x.name for x in img_tags_to_focus_on]
             # print(author,book, themes, quote)
         
+            joined_img_tags = ', '.join(img_tags)
 
             print('image tags to be used', img_tags)
             info_from_db = {
@@ -84,26 +87,15 @@ class FeedConsumer(WebsocketConsumer):
                 'all_themes' : themes,
                 'book' : book,
                 'author' : author,
-                'img_tags' : ', '.join([x.name for x in img_tags_to_focus_on]),
+                'img_tags' : joined_img_tags,
                 'quote': quote
             }
 
-
+            # 　checks if there are enough tokens. 
             if submissions_check(session_submissions):  
-
-                # test that the Dall-e Api works:
-                # It works!!!
-                # joined_img_tags = ', '.join(img_tags)
-                # response = openai.Image.create(
-                #     prompt=f'create an an image with the themes of {joined_img_tags} in the style of pixel art',
-                #     n=1,
-                #     size="256x256",
-                # )
-                # dall_e_image = response["data"][0]["url"]
-                # print(dall_e_image)
+                promt_for_dall_e = f'create an an scene that contains the themes of {joined_img_tags} {salt}'
 
                 # test ones
-                req = True
                 test_path = 'testimage.jpeg'
 
                 session_submissions -= 1
@@ -114,7 +106,18 @@ class FeedConsumer(WebsocketConsumer):
                 # print('after saving the new submission numbers :', session_object_contents['submissions'])
                 # print('', self.scope["session"]['submissions'])
 
-                if req:
+                if self.FULL_TEXT:
+                    # Dall-E api call 
+                    response = openai.Image.create(
+                        prompt= promt_for_dall_e,
+                        n=1,
+                        size="256x256",
+                        # size="1024x1024",
+                    )
+
+
+                    dall_e_image = response["data"][0]["url"]
+                    print(dall_e_image)
                     print('simulated succesful request')
                     self.send(text_data=json.dumps({
                         'source' : 'search',
@@ -122,7 +125,8 @@ class FeedConsumer(WebsocketConsumer):
                         'result' : test_path,
                         'submissions_left' : session_submissions,
                         'query_content' : info_from_db,
-                        # 'dall_e_image' : dall_e_image
+                        'dall_e_image' : dall_e_image,
+                        'prompt_used' : promt_for_dall_e,
 
                     }))
 

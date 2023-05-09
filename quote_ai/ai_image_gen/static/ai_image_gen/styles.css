@@ -1,11 +1,17 @@
 body {
     background-color: rgb(61, 57, 57);
+    font-family:Georgia, 'Times New Roman', Times, serif;
 }
 
 .title {
     color: antiquewhite;
+    font-size: 5rem ;
 }
 
+.standard_text {
+    color: antiquewhite;
+    font-size: 2rem;
+}
 p {
     color: antiquewhite;
 }
@@ -24,4 +30,20 @@ p {
 
 .btn-primary:hover{
     color: rgb(127, 31, 31) !important;
+}
+
+.dall_url {
+    font-size: 0.7rem;
+    font-weight: bold;
+}
+.sub_text {
+    color: rgb(55, 55, 55);
+}
+
+.nav_additions {
+    background-color: rgb(255, 161, 161);
+}
+.nav_additions p {
+    color: white;
+    font-size: 1rem;
 }

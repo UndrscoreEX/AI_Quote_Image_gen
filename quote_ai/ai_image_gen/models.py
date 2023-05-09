@@ -31,3 +31,8 @@ class Quotes(models.Model):
     text = models.TextField(null=False, blank=False)
     theme_tag = models.ManyToManyField(Theme_tags)
     image_tag = models.ManyToManyField(Image_tags)
+
+class Salt(models.Model):
+    def __str__(self) -> str:
+        return str(self.text)
+    text = models.CharField(max_length=150, null=False, blank=False)

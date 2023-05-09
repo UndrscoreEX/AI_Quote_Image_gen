@@ -16,12 +16,13 @@ const app = Vue.createApp({
         response_content : null,
         feedSocket : null,
         cur_book: null,
+        cur_author: null,
         cur_quote : null,
         cur_theme_tag: null,
         cur_chosen_theme_tag : null ,
         cur_image_tag : null,
         dall_e_image : null,
-
+        prompt_used: null
       }
     },
 
@@ -61,16 +62,17 @@ const app = Vue.createApp({
           let form = document.getElementById('form')
           form.addEventListener('submit', (e)=>{
             e.preventDefault()
-            this.some_response = false
-            let message = e.target.elements['search_bar'].value
-            console.log('message that is sent up to the consumer: ',message)
-              this.feedSocket.send(JSON.stringify({
-                'message':message
-              }))
-            form.reset()
-
-            // :: start the loading gif
             this.loading = true
+            // :: start the loading gif
+            console.log('loading is true::::')
+            this.some_response = false
+            this.error_message = null
+            let message = e.target.elements['search_bar'].value
+            // console.log('message that is sent up to the consumer: ',message)
+            this.feedSocket.send(JSON.stringify({
+              'message':message
+            })) 
+            form.reset()
 
           })
           
@@ -113,6 +115,7 @@ const app = Vue.createApp({
                 this.cur_theme_tag = data.query_content.all_themes
                 this.cur_chosen_theme_tag = data.query_content.chosen_theme
                 this.cur_image_tag = data.query_content.img_tags
+                this.cur_author = data.query_content.author
                 console.log(this.cur_quote)
                 
                 // :: if we got a result from the api
@@ -125,6 +128,7 @@ const app = Vue.createApp({
                     case 'insf_tokens':
                       this.some_response = true
                       this.error_message = 'no tokens left'
+                      this.loading = false
                       break
                     default:
                       this.some_response = true
@@ -132,7 +136,8 @@ const app = Vue.createApp({
                       this.dall_e_image = data.dall_e_image
                       this.submissions_remaining = data.submissions_left
                       this.loading = false
-
+                      this.prompt_used = data.prompt_used
+                      console.log('loading is turned off now :::::')
                       break
                   }
 
@@ -146,7 +151,9 @@ const app = Vue.createApp({
               // :: if internal DB search failed
               else if (data.source && data.source == 'fail'){
                 this.loading = false
-                this.img_tags = 'search query failed'
+                this.some_response = true
+
+                this.error_message = 'search query failed'
               }
             // }
 
@@ -155,13 +162,23 @@ const app = Vue.createApp({
         },
 
         methods : {
-          search_keyword(kw){
+          search_keyword(kw) {
             console.log('sending', kw)
             console.log(this.submissions_remaining, this.img_tags, this.search_list_str)
             this.feedSocket.send(JSON.stringify({
               'message':kw
             }))
+            this.loading = true
+            this.some_response = false
+
+            // :: start the loading gif
+            console.log('loading is true::::')
+
   
+          },
+          start_loading() {
+            console.log('loading is set to True')
+            this.loading = true
           }
         }
 })
@@ -181,8 +198,7 @@ app.mount('#app')
 
 // To do:
 // add options for Japanese language ones.
-// loading gif isnt working
-// new isolated model with 'salt'
+// add wwaaaaaaay more image words
 // add post mthod with validation, CSRF validation through websocket 
-// add the 'salt' . i.e 'A dramatic picture that includes the themes of:', 'A pixel art scene of' , 'a scene from a 
 // make it look better
+// insert quote ID + url to a new table and then have a carousel below with 5 random selections 

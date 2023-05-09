@@ -16,6 +16,11 @@
 
 <body>
     <div id="app">
+        <div class="container row border">
+            <nav class=" m-2 navbar fixed-top m-0 col-1 nav_additions">
+                <p class="navbar-brand mx-auto mb-0">tokens : $[submissions_remaining]</p> 
+            </nav>
+        </div>
         <div class="pt-5 container mx-auto my-auto text-center">
 
             <h1 class="title">AI Image Generator</h1>
@@ -24,12 +29,12 @@
                 <input placeholder='try it out' type="text" v-model="search" name="search_bar">
 
             </form>
-            <div>
-                <h1 v-if="search" :class="{ n_found: !includes, found: includes,  }" class="title"> $[search]</h1>
-                <h1 v-else class="title">Start searching</h1>
+            <div class="mt-2 mb-2">
+                <p v-if="search" :class="{ n_found: !includes, found: includes,  }" class="standard_text"> $[search]</p>
+                <p class="standard_text" v-else>Start searching</p>
             </div>
 
-            <div class="container" style="height:100px">
+            <div class="container mt-5" style="height:100px">
                 <div v-if="filtered_lists">
                     <div class="row justify-content-md-center ">
                         <div v-for="tag in filtered_lists.slice(0,5)" class="d-flex col-md-2 card  mx-2">
@@ -58,14 +63,17 @@
                 </div>
 
                 <div v-else>
-                    <!-- <img src="$[ img_path ]" alt=""> -->
-                    <img class="w-25" src="{% static '/testimage.jpeg' %}" alt="">
+                    <h1 class="title"> Generated Image </h1>
 
-                    <p>$[ img_path ]</p>
-
-                    <h1> generated image </h1>
-                    <!-- <img src="$[dall_e_image]"> -->
-                    <img :src="dall_e_image">
+                    <div  v-if="dall_e_image">
+                        <img class='border m-2' :src="dall_e_image">
+                        <div>
+                            <a :href='dall_e_image' class="dall_url"> Generated image </a>
+                        </div>
+                    </div>
+                    <div class="mb-5" v-else>
+                        <img src="{% static '/loading.gif' %}">
+                    </div>
                     <!-- <img src="https://oaidalleapiprodscus.blob.core.windows.net/private/org-OqouMzKmPZrpejBBfCPRkGLo/user-YFH8KEPWsZGLg0quXyghK8w9/img-FRNFjtXqzorH75d0jZUjnHNt.png?st=2023-05-06T04%3A21%3A49Z&se=2023-05-06T06%3A21%3A49Z&sp=r&sv=2021-08-06&sr=b&rscd=inline&rsct=image/png&skoid=6aaadede-4fb3-4698-a8f6-684d7786b067&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2023-05-06T00%3A42%3A29Z&ske=2023-05-07T00%3A42%3A29Z&sks=b&skv=2021-08-06&sig=np2V7zDnvz/JGIIlB5zQnNCMTxEFHO/HzCY/KkAac2k%3D"> -->
 
                     <p></p>
@@ -82,42 +90,20 @@
                             <h1>
                                 $[cur_book]
                             </h1>
+                            <h5> $[cur_author]</h5>
                         </div>
-                        <div class="card-inner w-75 mx-auto">
-                            <p>chosen tag : $[cur_chosen_theme_tag] </p>
+                        <div class="card-inner w-75 mx-auto mb-4">
+                            <p class="sub_text">chosen tag : $[cur_chosen_theme_tag] </p>
                             <h3 v-html="cur_quote"></h3>
-                            <p>themes: $[cur_theme_tag] </p>
-                            <p>image tags: $[cur_image_tag]</p>                    
+                            <p class="sub_text">themes: $[cur_theme_tag] </p>
+                            <p class="sub_text">image tags: $[cur_image_tag]</p>     
+                            <p class="sub_text">prompt: $[ prompt_used ]</p>               
                         </div>
                 </div>
             </div>
         </div>
-            <!-- 
-            <div id="theme_tag_results_raw">
-                <p>
-                    results from backend {{ theme_tag_results_raw }}
-                </p>
-            </div>
-            <div :key='img_tags'>
-                <p>
-                    filtered results from Vue.js $[ search_list_str ]
 
-                </p> -->
-            <p v-if="img_tags">
-
-                websocket results are : $[ img_tags ]
-            </p>
-            <!-- showing our official number -->
-            <div>
-                <p> Submissions we allow: {{ sumbissions_so_far }}</p>
-            </div>
-
-            <!-- showing the remaining charges this session-->
-            <div>
-                <p v-text="submissions_remaining">submissions remaining</p>
-            </div>
-        </div>
-
+      
 
 
     </div>
