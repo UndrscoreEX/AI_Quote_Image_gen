@@ -197,8 +197,7 @@ app.mount('#app')
 
 
 // To do:
-// add options for Japanese language ones.
 // add wwaaaaaaay more image words
-// add post mthod with validation, CSRF validation through websocket 
 // make it look better
 // insert quote ID + url to a new table and then have a carousel below with 5 random selections 
+// low priority - add options for Japanese language ones.
