@@ -37,7 +37,8 @@ p {
     font-weight: bold;
 }
 .sub_text {
-    color: rgb(55, 55, 55);
+    color: rgb(73, 73, 73);
+    font-size: 0.8rem;
 }
 
 .nav_additions {
@@ -45,5 +46,15 @@ p {
 }
 .nav_additions p {
     color: white;
-    font-size: 1rem;
+    font-size: 0.8rem;
+}
+
+.quote_text {
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 2rem;
+
+}
+
+.hidden {
+    display: none;
 }

@@ -21,13 +21,11 @@ class FeedConsumer(WebsocketConsumer):
         session_object = SessionStore(session_key=sess_key)
         session_object.load()
 
-        print('on connection, the session object should look like this: ', session_object)
+        # print('on connection, the session object should look like this: ', session_object)
 
-
-        print('testing if the save actually fucking works')
         session_object['submissions'] = 5
         session_object.save()
-        print(session_object.get('submissions'))
+        # print(session_object.get('submissions'))
 
         # This will not work if there is multiple servers. You will need to get a redis DB for a cache layer and query this each time. 
         try:
@@ -50,11 +48,11 @@ class FeedConsumer(WebsocketConsumer):
         sess_key = self.scope["session"].session_key
         session_object = SessionStore(session_key=sess_key)
         session_object.load()
-        print('upon receiving websocket request, the session object should look like this: ', session_object)
+        # print('upon receiving websocket request, the session object should look like this: ', session_object)
 
         session_submissions = self.scope["session"].get('submissions') 
-        print('sessions found from the old scope way ==',session_submissions)
-        print('sessions found from new SessionObject way ==',session_object['submissions'])
+        # print('sessions found from the old scope way ==',session_submissions)
+        # print('sessions found from new SessionObject way ==',session_object['submissions'])
 
 
         text_data_json = json.loads(text_data)
@@ -81,7 +79,7 @@ class FeedConsumer(WebsocketConsumer):
         
             joined_img_tags = ', '.join(img_tags)
 
-            print('image tags to be used', img_tags)
+            # print('image tags to be used', img_tags)
             info_from_db = {
                 'chosen_theme' : message,
                 'all_themes' : themes,
@@ -106,6 +104,7 @@ class FeedConsumer(WebsocketConsumer):
                 # print('after saving the new submission numbers :', session_object_contents['submissions'])
                 # print('', self.scope["session"]['submissions'])
 
+                # to check whether I will do paid request or just test it. 
                 if self.FULL_TEXT:
                     # Dall-E api call 
                     response = openai.Image.create(
@@ -116,9 +115,10 @@ class FeedConsumer(WebsocketConsumer):
                     )
 
 
+
                     dall_e_image = response["data"][0]["url"]
-                    print(dall_e_image)
-                    print('simulated succesful request')
+                    # print('Image URL: ',dall_e_image)
+                    # print('simulated succesful request')
                     self.send(text_data=json.dumps({
                         'source' : 'search',
                         'message' : img_tags,
@@ -129,7 +129,10 @@ class FeedConsumer(WebsocketConsumer):
                         'prompt_used' : promt_for_dall_e,
 
                     }))
-
+                    try:
+                        DB_interactions.save_new_image(quote=random_option, url=dall_e_image, prompt_text=promt_for_dall_e)
+                    except Exception as e:
+                        print('image didnt save because ',e)
                 # if db search was successful but the api didn't give a successful image back 
                 else:
                     print('simulated failed api request')

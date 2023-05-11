@@ -37,9 +37,9 @@ class Salt(models.Model):
         return str(self.text)
     text = models.CharField(max_length=150, null=False, blank=False)
 
-
-# class Saved_images(models.Model):
-#     def __str__(self) -> str:
-#         return str(self.quote)
-#     quote_text = models.ForeignKey(Quotes, on_delete=models.CASCADE, related_name='saved_image')
-#     quote_id = models.IntegerField(null=False, blank=False)
+class Saved_images(models.Model):
+    def __str__(self) -> str:
+        return str(self.quote)
+    quote = models.ForeignKey(Quotes, on_delete=models.CASCADE, related_name='saved_image')
+    ai_image_url = models.URLField(max_length=500)
+    prompt = models.TextField(max_length=500, null=False, blank= False)

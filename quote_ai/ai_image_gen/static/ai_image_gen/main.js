@@ -22,7 +22,9 @@ const app = Vue.createApp({
         cur_chosen_theme_tag : null ,
         cur_image_tag : null,
         dall_e_image : null,
-        prompt_used: null
+        prompt_used: null,
+        toggle : false,
+
       }
     },
 
@@ -199,5 +201,5 @@ app.mount('#app')
 // To do:
 // add wwaaaaaaay more image words
 // make it look better
-// insert quote ID + url to a new table and then have a carousel below with 5 random selections 
+// have a carousel below with 5 random selections - toggle on or off 
 // low priority - add options for Japanese language ones.

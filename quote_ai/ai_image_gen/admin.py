@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Quotes, Theme_tags, Image_tags, Book, Salt
+from .models import Quotes, Theme_tags, Image_tags, Book, Salt, Saved_images
 # Register your models here.
 
 @admin.register(Quotes)
@@ -22,3 +22,7 @@ class  Book_class(admin.ModelAdmin):
 @admin.register(Salt)
 class Salt_class(admin.ModelAdmin):
     list_display = ['text']
+
+@admin.register(Saved_images)
+class Saved_images_class(admin.ModelAdmin):
+    list_display = ['pk','quote', 'ai_image_url']
