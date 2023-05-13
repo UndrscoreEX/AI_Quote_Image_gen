@@ -19,39 +19,23 @@ class DB_interactions:
         salt = random.choice(salt)
         return salt
     
+    # from a time when I didn't know that Dall-E will invalidate the links. 
     @classmethod
     def save_new_image(cls, quote, url, prompt_text):
-        Saved_images.objects.create(quote=quote, ai_image_url=url, prompt=prompt_text)
+        # Saved_images.objects.create(quote=quote, ai_image_url=url, prompt=prompt_text)
+        Saved_images.create_from_url(quote=quote,image_url=url, prompt=prompt_text)
 
     @classmethod
     def get_saved_images(cls):
 
         # 5 random numbers 
-        length =  Saved_images.objects.count()
-        rand_nums = random.sample(range(1,length), 5)
-        print(rand_nums)
-        # rand_arr =  [Saved_images.objects.get(pk=4) for x in rand_nums]
-        # rand_images = Saved_images.objects.get(pk=2)
-        rand_images = Saved_images.objects.filter(pk__in=rand_nums)
-        # print("all random images",rand_images)
+        pks =  list(Saved_images.objects.values_list('id',flat=True))
+        random.shuffle(pks)
+        print(pks)
+        rand_images = Saved_images.objects.filter(pk__in=pks[:5])
         return rand_images
 
 
-
-# eventually this will be needed to check the redis db so it is worth keeping it here in the DB interactions. 
-
-# For later use:
-# def tokens_check(value):
-#     def decorator(fn):
-#         def wrapper(*args, **kwargs):
-#             if value <= 0:
-#                 print('no more tokens left')
-#             else:
-#                 print('submission tokens checked')
-#                 return fn(*args, **kwargs)
-#         return wrapper
-#     return decorator
-    
 def submissions_check(token):
     print(f'remaining tokens are : {token}')
     return token> 0

@@ -141,3 +141,5 @@ STATICFILES_DIRS = [
     BASE_DIR / 'ai_image_gen/static/ai_image_gen/'
 ]
 
+# MEDIA_URL = '/uploads/'
+# MEDIA_ROOT = os.path.join(BASE_DIR, 'uploads')

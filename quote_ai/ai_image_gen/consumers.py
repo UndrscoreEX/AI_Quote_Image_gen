@@ -48,6 +48,10 @@ class FeedConsumer(WebsocketConsumer):
         sess_key = self.scope["session"].session_key
         session_object = SessionStore(session_key=sess_key)
         session_object.load()
+        self.send(text_data=json.dumps({
+            
+        }))
+            
         # print('upon receiving websocket request, the session object should look like this: ', session_object)
 
         session_submissions = self.scope["session"].get('submissions') 
@@ -159,7 +163,8 @@ class FeedConsumer(WebsocketConsumer):
             print(e)
             print('DB query failure')
             self.send(text_data=json.dumps({
-                'source' : 'fail'
+                'source' : 'fail',
+                'reason' : e,
             }))
             
         

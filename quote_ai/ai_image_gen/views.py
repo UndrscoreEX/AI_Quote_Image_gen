@@ -17,14 +17,14 @@ class Home_page(View):
 
         saved_images_dict = [{
                 'quote': img.quote.text,
-                'image_url' : img.ai_image_url,
+                'image_url' : img.ai_img,
                 'author' : img.quote.book.author,
                 'book' : img.quote.book.name,
                 'img_tags' : list(img.quote.theme_tag.values_list('name', flat=True),),
                 'theme_tags' : list(img.quote.image_tag.values_list('name', flat=True))
             } for img in images]
 
-        # print(saved_images_dict)
+        print(saved_images_dict)
 
 
         print('checking sessions at the start: ',  request.session.session_key, request.session['submissions'] )

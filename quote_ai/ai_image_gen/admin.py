@@ -25,4 +25,4 @@ class Salt_class(admin.ModelAdmin):
 
 @admin.register(Saved_images)
 class Saved_images_class(admin.ModelAdmin):
-    list_display = ['pk','quote', 'ai_image_url']
+    list_display = ['pk','quote', 'ai_img']

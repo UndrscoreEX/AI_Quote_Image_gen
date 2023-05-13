@@ -24,6 +24,10 @@ const app = Vue.createApp({
         dall_e_image : null,
         prompt_used: null,
         toggle : false,
+        error_reason : null,
+        ready_to_send: false,
+        opened_examples : [],
+
 
       }
     },
@@ -64,16 +68,25 @@ const app = Vue.createApp({
           let form = document.getElementById('form')
           form.addEventListener('submit', (e)=>{
             e.preventDefault()
-            this.loading = true
-            // :: start the loading gif
-            console.log('loading is true::::')
-            this.some_response = false
-            this.error_message = null
             let message = e.target.elements['search_bar'].value
-            // console.log('message that is sent up to the consumer: ',message)
-            this.feedSocket.send(JSON.stringify({
-              'message':message
-            })) 
+
+            // validating if the message is correct 
+            if ((this.search_list_str.includes(' '+message+' '))){
+              this.loading = true
+              // :: start the loading gif
+              console.log('loading is true::::')
+              this.some_response = false
+              this.error_message = null
+              // console.log('message that is sent up to the consumer: ',message)
+              this.feedSocket.send(JSON.stringify({
+                'message':message
+              })) 
+            }
+            else{
+              console.log('not a valied term')
+              this.error_message = 'Theme not available. Try another valid option'
+              this.some_response = true
+            }
             form.reset()
 
           })
@@ -156,6 +169,7 @@ const app = Vue.createApp({
                 this.some_response = true
 
                 this.error_message = 'search query failed'
+                this.error_reason = data.reason
               }
             // }
 
@@ -181,11 +195,19 @@ const app = Vue.createApp({
           start_loading() {
             console.log('loading is set to True')
             this.loading = true
+          },
+          addToOpenedExamples(index) {
+            console.log(index)
+            if (!this.opened_examples.includes(index)){
+              this.opened_examples.push(index);
+            }
+            else if (this.opened_examples.includes(index)){
+              this.opened_examples.splice(this.opened_examples.indexOf(index), 1);
+            }
           }
         }
 })
 
-// global.vm = app;
 
 
 
@@ -203,3 +225,4 @@ app.mount('#app')
 // make it look better
 // have a carousel below with 5 random selections - toggle on or off 
 // low priority - add options for Japanese language ones.
+
