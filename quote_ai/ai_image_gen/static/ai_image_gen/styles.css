@@ -58,3 +58,14 @@ p {
 .hidden {
     display: none;
 }
+
+.sub_heading {
+    font-size: 1rem;
+    font-weight: bold;
+    color: black;
+}
+
+/* .move_animation {
+    transition: transform 0.3s ease-in-out;
+    transform: translateX(100px);
+  } */

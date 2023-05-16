@@ -46,10 +46,13 @@ const app = Vue.createApp({
         // created() {
         // },
 
+
+
         // when vue is mounted
         mounted(){
           let url = `ws://${window.location.host}/ws/socket-server/`
           const feedSocket = new WebSocket(url)     
+
 
           let form = document.getElementById('form')
           form.addEventListener('submit', (e)=>{
@@ -73,9 +76,7 @@ const app = Vue.createApp({
 
             // initial connection:
             // type field is only used for DB success/fail control
-            if (data.type){
-              if (data.type == 'DB_Success'){
-
+            if (data.type && data.type == 'DB_Success'){
                 this.submissions_remaining = data.submissions_left
                 console.log('db_connection successful')
 
@@ -85,53 +86,49 @@ const app = Vue.createApp({
                 this.search_list_str = ' '+data.message.join(' ')
 
               }
-              else if (data.type == 'DB_fail'){
+              else if (data.type && data.type == 'DB_fail'){
                 // *****************
                 // maybe add a message for the render to report this
                 console.log('db_connection failed')
               }
-            }
+
 
             // on response from form request:
-            if (data.source){
-              if (data.source == 'search'){
+            if (data.source && data.source == 'search'){
+              // if we got a result from the api
                 this.img_tags= data.message.join(', ')
+                this.some_response = true
 
-                // if we got a result from the api
-                if (data.result){
-                  this.some_response = true
-
-                  // if the DB query worked but the api response was bad
-                  if (data.result == 'db_fail'){
+                // if the DB query worked but the api response was bad
+                if (data.result && data.result == 'db_fail'){
                     this.error_message = 'request failed'
                   }
                   // if the DB query worked but there are no tokens left
-                  else if (data.result == 'insf_tokens'){
-                    this.error_message = 'no tokens left'
-
-                  }
-
-                  // if it worked as expected
-                  else{
-                    this.img_path = data.result
-                    this.submissions_remaining = data.submissions_left
-                  }
-
-                  this.loading = false
-                  console.log('received')
+                else if (data.result && data.result == 'insf_tokens'){
+                  this.error_message = 'no tokens left'
 
                 }
-              }
+
+                // if it worked as expected
+                else{
+                  this.img_path = data.result
+                  this.submissions_remaining = data.submissions_left
+                }
+                this.loading = false
+                console.log('received')
+
+                }
 
               // if internal DB search failed
-              else if (data.source == 'fail'){
+              else if (data.source && data.source == 'fail'){
+                console.log('got this far------------')
                 this.loading = false
                 this.img_tags = 'search query failed'
               }
             }
 
 
-          }
+          
         },
 })
 

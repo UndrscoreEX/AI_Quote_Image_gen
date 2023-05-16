@@ -14,20 +14,29 @@ class FeedConsumer(WebsocketConsumer):
 
     FULL_TEXT = True
 
-    def connect(self):
-        self.accept()
-        session_submissions = self.scope["session"].get('submissions')
+    def get_session_submissions(self):
+        return self.scope["session"].get('submissions')
+    
+    def get_session_object(self):
         sess_key = self.scope["session"].session_key
         session_object = SessionStore(session_key=sess_key)
+        return session_object
+        
+        
+
+    def connect(self):
+        self.accept()
+        session_submissions = self.get_session_submissions()
+
+        session_object = self.get_session_object()
         session_object.load()
 
-        # print('on connection, the session object should look like this: ', session_object)
 
+        # ::::: to give extra tokens upon hard refresh, use this:
         session_object['submissions'] = 5
         session_object.save()
-        # print(session_object.get('submissions'))
 
-        # This will not work if there is multiple servers. You will need to get a redis DB for a cache layer and query this each time. 
+        # :::: This will not work if there is multiple servers. You will need to get a redis DB for a cache layer and query this each time. 
         try:
             all_theme_tags = [x.name for x in DB_interactions.tags.all()]
             self.send(text_data=json.dumps({
@@ -45,19 +54,11 @@ class FeedConsumer(WebsocketConsumer):
 
     def receive(self, text_data):
 
-        sess_key = self.scope["session"].session_key
-        session_object = SessionStore(session_key=sess_key)
+        session_object = self.get_session_object()
         session_object.load()
-        self.send(text_data=json.dumps({
             
-        }))
-            
-        # print('upon receiving websocket request, the session object should look like this: ', session_object)
 
-        session_submissions = self.scope["session"].get('submissions') 
-        # print('sessions found from the old scope way ==',session_submissions)
-        # print('sessions found from new SessionObject way ==',session_object['submissions'])
-
+        session_submissions = self.get_session_submissions()
 
         text_data_json = json.loads(text_data)
         message = text_data_json['message']
@@ -105,8 +106,6 @@ class FeedConsumer(WebsocketConsumer):
                 session_object['submissions'] = session_submissions
                 session_object.save()
 
-                # print('after saving the new submission numbers :', session_object_contents['submissions'])
-                # print('', self.scope["session"]['submissions'])
 
                 # to check whether I will do paid request or just test it. 
                 if self.FULL_TEXT:

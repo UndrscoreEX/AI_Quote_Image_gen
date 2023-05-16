@@ -6,7 +6,6 @@ class DB_interactions:
     tags = Theme_tags.objects
     salt = Salt.objects
 
-
     @classmethod
     def get_image_tags(cls, theme_tags):
         img_tags = cls.tags.filter(name= theme_tags)[0]
@@ -31,9 +30,17 @@ class DB_interactions:
         # 5 random numbers 
         pks =  list(Saved_images.objects.values_list('id',flat=True))
         random.shuffle(pks)
-        print(pks)
         rand_images = Saved_images.objects.filter(pk__in=pks[:5])
-        return rand_images
+        saved_images_dict = [{
+                'quote': img.quote.text,
+                'image_url' : img.ai_img,
+                'author' : img.quote.book.author,
+                'book' : img.quote.book.name,
+                'img_tags' : list(img.quote.theme_tag.values_list('name', flat=True),),
+                'theme_tags' : list(img.quote.image_tag.values_list('name', flat=True))
+            } for img in rand_images]
+        
+        return saved_images_dict
 
 
 def submissions_check(token):

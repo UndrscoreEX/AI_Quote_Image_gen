@@ -38,13 +38,18 @@ const app = Vue.createApp({
 
     watch: {
         search(newVal) {
-          if (this.search_list_str.includes(' '+newVal)){
-            this.includes = true
-          }
+          if (newVal){
+            let capNewVal = newVal[0].toLowerCase() + newVal.slice(1)
+            if (this.search_list_str.includes(' '+capNewVal)){
+              this.includes = true
+            }
+  
+            else{
+              this.includes = false
+              console.log(capNewVal)
+              console.log(` not included `, this.includes)
+            }
 
-          else{
-            this.includes = false
-            console.log(` not included `, this.includes)
           }
 
           // :: updates of the filtered_lists field. Probably could be added to the computed field but this had a few problems. 
@@ -204,6 +209,16 @@ const app = Vue.createApp({
             else if (this.opened_examples.includes(index)){
               this.opened_examples.splice(this.opened_examples.indexOf(index), 1);
             }
+          },
+          clean_quote(quote_text){
+            if (quote_text.length > 80 ){
+              quote_text = quote_text.slice(0,80)+'...'
+              
+            }
+            this.quote_text = DOMPurify.sanitize(quote_text, {
+              ALLOWED_TAGS: ['br'],
+            });
+            return quote_text
           }
         }
 })
@@ -222,7 +237,10 @@ app.mount('#app')
 
 // To do:
 // add wwaaaaaaay more image words
+// write tests 
+// Decouple and add more functions/ classses for everything
 // make it look better
-// have a carousel below with 5 random selections - toggle on or off 
 // low priority - add options for Japanese language ones.
+// Add dynamic elements the carousel and the card.
+
 
