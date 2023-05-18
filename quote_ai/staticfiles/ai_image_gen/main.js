@@ -1,4 +1,3 @@
-
 const app = Vue.createApp({
     data() {
       return {
@@ -14,127 +13,207 @@ const app = Vue.createApp({
         result : null,
         img_path : null,
         submissions_remaining : null,
+        response_content : null,
+        feedSocket : null,
+        cur_book: null,
+        cur_author: null,
+        cur_quote : null,
+        cur_theme_tag: null,
+        cur_chosen_theme_tag : null ,
+        cur_image_tag : null,
+        dall_e_image : null,
+        prompt_used: null,
+        toggle : false,
+        error_reason : null,
+        ready_to_send: false,
+        opened_examples : [],
+
 
       }
     },
 
-    // computed:{
-    // },
+    computed:{
+     
+    },
 
     watch: {
         search(newVal) {
-          if (this.search_list_str.includes(' '+newVal)){
-            this.includes = true
+          if (newVal){
+            let capNewVal = newVal[0].toLowerCase() + newVal.slice(1)
+            if (this.search_list_str.includes(' '+capNewVal)){
+              this.includes = true
+            }
+  
+            else{
+              this.includes = false
+            }
+
           }
 
-          else{
-            this.includes = false
-            console.log(` not included `, this.includes)
-          }
-
-          // updates of the filtered_lists field. Probably could be added to the computed field but this had a few problems. 
-          const searchTerm = this.search.trim().toLowerCase();
+          // :: updates of the filtered_lists field. Probably could be added to the computed field but this had a few problems. 
+          let searchTerm = this.search.trim().toLowerCase();
           this.filtered_lists = this.search_list.filter((tag) =>
           tag.toLowerCase().includes(searchTerm))
-          console.log(this.filtered_lists)
+
+          // :: randomize the results
+          this.filtered_lists = this.filtered_lists.sort(() => .5 - Math.random())
         },
         
       
       },
         
-        // when vue is launched
-        // created() {
-        // },
-
-        // when vue is mounted
+        // :: when vue is mounted
         mounted(){
           let url = `ws://${window.location.host}/ws/socket-server/`
-          const feedSocket = new WebSocket(url)     
+          this.feedSocket = new WebSocket(url)     
 
           let form = document.getElementById('form')
           form.addEventListener('submit', (e)=>{
             e.preventDefault()
-            this.some_response = false
             let message = e.target.elements['search_bar'].value
-            console.log(message)
-              // validate that the imput is right
-              feedSocket.send(JSON.stringify({
-                'message':message
-              }))
+
+            // validating if the message is correct before sending the message via the search_keyword method
+            if ((this.search_list_str.includes(' '+message+' '))){
+              this.search_keyword(message)
+            }
+
+            else{
+              console.log('not a valied term')
+              this.error_message = 'Theme not available. Try another valid option'
+              this.some_response = true
+
+            }
+
             form.reset()
-            this.loading = true
+
           })
           
           
-          // must be arrow function to get access to the vue object (this.)
-          feedSocket.onmessage = (e)=> {
+          // :: must be arrow function to get access to the vue object (this.)
+          this.feedSocket.onmessage = (e)=> {
             data = JSON.parse(e.data)
             console.log('websocket message',data)
 
-            // initial connection:
-            // type field is only used for DB success/fail control
-            if (data.type){
-              if (data.type == 'DB_Success'){
-
+            // :: initial connection:
+            // :: type field is only used/checked for DB success/fail control
+              if (data.type && data.type == 'DB_Success'){
                 this.submissions_remaining = data.submissions_left
                 console.log('db_connection successful')
 
-                // populating the fields at the start
-                this.filtered_lists = data.message
+                // :: populating the fields at the start
                 this.search_list = data.message
                 this.search_list_str = ' '+data.message.join(' ')
 
+                // :: randomize the results
+                this.filtered_lists = data.message.sort(() => .5 - Math.random())
+
               }
-              else if (data.type == 'DB_fail'){
-                // *****************
-                // maybe add a message for the render to report this
+              else if (data.type && data.type == 'DB_fail'){
+                this.error_message = 'initial DB_connection failed'
                 console.log('db_connection failed')
               }
-            }
 
-            // on response from form request:
-            if (data.source){
-              if (data.source == 'search'){
+            // :: on response from form request:
+            if (data.source && data.source == 'search'){
                 this.img_tags= data.message.join(', ')
+                this.cur_book = data.query_content.book
 
-                // if we got a result from the api
-                if (data.result){
-                  this.some_response = true
+                // :: Sanitizing the quote that I get from the DB to allow the <br> tags to take effect.
+                // :: connects with the v-html tag in the render
+                this.cur_quote = DOMPurify.sanitize(data.query_content.quote, {
+                  ALLOWED_TAGS: ['br'],
+                });
 
-                  // if the DB query worked but the api response was bad
-                  if (data.result == 'db_fail'){
-                    this.error_message = 'request failed'
-                  }
-                  // if the DB query worked but there are no tokens left
-                  else if (data.result == 'insf_tokens'){
-                    this.error_message = 'no tokens left'
-
-                  }
-
-                  // if it worked as expected
-                  else{
-                    this.img_path = data.result
-                    this.submissions_remaining = data.submissions_left
-                  }
-
+                this.cur_theme_tag = data.query_content.all_themes
+                this.cur_chosen_theme_tag = data.query_content.chosen_theme
+                this.cur_image_tag = data.query_content.img_tags
+                this.cur_author = data.query_content.author
+                
+                // :: if we got a result from the api
+                if (data.result) {
+                  // :: end the loading gif because a responsse was obtained 
                   this.loading = false
-                  console.log('received')
-
+                  switch (data.result) {
+                    case 'db_fail':
+                      this.some_response = true
+                      this.error_message = 'request failed'
+                      break
+                    case 'insf_tokens':
+                      this.some_response = true
+                      this.error_message = 'no tokens left'
+                      break
+                    default:
+                      this.some_response = true
+                      this.img_path = data.result
+                      this.dall_e_image = data.dall_e_image
+                      this.submissions_remaining = data.submissions_left
+                      this.prompt_used = data.prompt_used
+                      console.log('loading is turned off now :::::')
+                      break
+                  }
                 }
+                
               }
 
-              // if internal DB search failed
-              else if (data.source == 'fail'){
+              // :: if internal DB search failed
+              else if (data.source && data.source == 'fail'){
                 this.loading = false
-                this.img_tags = 'search query failed'
+                this.some_response = true
+
+                this.error_message = 'search query failed'
+                this.error_reason = data.reason
               }
-            }
-
-
           }
         },
-})
 
+        methods : {
+          search_keyword(kw) {
+
+              this.error_message = null
+
+              // console.log('sent the first one')
+              // submit to the consumer
+              // this.feedSocket.send(JSON.stringify({
+              //   'message':message
+              // })) 
+              console.log('sending', kw)
+              console.log(this.submissions_remaining, this.img_tags, this.search_list_str)
+              this.feedSocket.send(JSON.stringify({
+                'message':kw
+              }))
+              this.loading = true
+              this.some_response = false
+  
+              // :: start the loading gif
+              console.log('loading is true::::')
+
+  
+          },
+          start_loading() {
+            console.log('loading is set to True')
+            this.loading = true
+          },
+          addToOpenedExamples(index) {
+            console.log(index)
+            if (!this.opened_examples.includes(index)){
+              this.opened_examples.push(index);
+            }
+            else if (this.opened_examples.includes(index)){
+              this.opened_examples.splice(this.opened_examples.indexOf(index), 1);
+            }
+          },
+          clean_quote(quote_text){
+            if (quote_text.length > 80 ){
+              quote_text = quote_text.slice(0,80)+'...'
+              
+            }
+            this.quote_text = DOMPurify.sanitize(quote_text, {
+              ALLOWED_TAGS: ['br'],
+            });
+            return quote_text
+          }
+        }
+})
 
 
 
@@ -149,11 +228,9 @@ app.mount('#app')
 
 
 // To do:
-// add more records, 
-// add options for Japanese language ones. 
-// give 3-5 suggestions of kw that can be clicked. Give option for a random search
-// validate the input to avoid XSS
-// add post mthod with validation, CSRF validation through websocket 
-// figure out the dall e api
-// add the 'salt' . i.e 'A dramatic picture that includes the themes of:', 'A pixel art scene of' , 'a scene from a 
-// Find how to limit the cookies to 2 picture and count how many have been made
+// write tests 
+// make it look better
+// low priority - add options for Japanese language ones.
+// Add dynamic elements the carousel and the card.
+// figure out why it wont sent send a socket when there is a banned api request.
+

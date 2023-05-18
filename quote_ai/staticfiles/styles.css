@@ -1,11 +1,17 @@
 body {
     background-color: rgb(61, 57, 57);
+    font-family:Georgia, 'Times New Roman', Times, serif;
 }
 
-h1 {
+.title {
     color: antiquewhite;
+    font-size: 5rem ;
 }
 
+.standard_text {
+    color: antiquewhite;
+    font-size: 2rem;
+}
 p {
     color: antiquewhite;
 }
@@ -21,3 +27,45 @@ p {
 .n_found {
     color: red !important;
 }
+
+.btn-primary:hover{
+    color: rgb(127, 31, 31) !important;
+}
+
+.dall_url {
+    font-size: 0.7rem;
+    font-weight: bold;
+}
+.sub_text {
+    color: rgb(73, 73, 73);
+    font-size: 0.8rem;
+}
+
+.nav_additions {
+    background-color: rgb(255, 161, 161);
+}
+.nav_additions p {
+    color: white;
+    font-size: 0.8rem;
+}
+
+.quote_text {
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 2rem;
+
+}
+
+.hidden {
+    display: none;
+}
+
+.sub_heading {
+    font-size: 1rem;
+    font-weight: bold;
+    color: black;
+}
+
+/* .move_animation {
+    transition: transform 0.3s ease-in-out;
+    transform: translateX(100px);
+  } */

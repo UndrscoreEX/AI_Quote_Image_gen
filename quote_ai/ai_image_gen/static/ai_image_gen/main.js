@@ -11,7 +11,6 @@ const app = Vue.createApp({
         some_response: null,
         error_message : null,
         result : null,
-        img_path : null,
         submissions_remaining : null,
         response_content : null,
         feedSocket : null,
@@ -26,7 +25,10 @@ const app = Vue.createApp({
         toggle : false,
         error_reason : null,
         ready_to_send: false,
-        opened_examples : [],
+        opened_example : null,
+        item_book : null,
+        item_quote : null,
+
 
 
       }
@@ -46,8 +48,6 @@ const app = Vue.createApp({
   
             else{
               this.includes = false
-              console.log(capNewVal)
-              console.log(` not included `, this.includes)
             }
 
           }
@@ -59,7 +59,6 @@ const app = Vue.createApp({
 
           // :: randomize the results
           this.filtered_lists = this.filtered_lists.sort(() => .5 - Math.random())
-          console.log('key pressed, this is the list associated with the string so far: ',this.filtered_lists)
         },
         
       
@@ -75,23 +74,18 @@ const app = Vue.createApp({
             e.preventDefault()
             let message = e.target.elements['search_bar'].value
 
-            // validating if the message is correct 
+            // validating if the message is correct before sending the message via the search_keyword method
             if ((this.search_list_str.includes(' '+message+' '))){
-              this.loading = true
-              // :: start the loading gif
-              console.log('loading is true::::')
-              this.some_response = false
-              this.error_message = null
-              // console.log('message that is sent up to the consumer: ',message)
-              this.feedSocket.send(JSON.stringify({
-                'message':message
-              })) 
+              this.search_keyword(message)
             }
+
             else{
               console.log('not a valied term')
               this.error_message = 'Theme not available. Try another valid option'
               this.some_response = true
+
             }
+
             form.reset()
 
           })
@@ -111,6 +105,7 @@ const app = Vue.createApp({
                 // :: populating the fields at the start
                 this.search_list = data.message
                 this.search_list_str = ' '+data.message.join(' ')
+
                 // :: randomize the results
                 this.filtered_lists = data.message.sort(() => .5 - Math.random())
 
@@ -123,7 +118,6 @@ const app = Vue.createApp({
             // :: on response from form request:
             if (data.source && data.source == 'search'){
                 this.img_tags= data.message.join(', ')
-
                 this.cur_book = data.query_content.book
 
                 // :: Sanitizing the quote that I get from the DB to allow the <br> tags to take effect.
@@ -136,10 +130,11 @@ const app = Vue.createApp({
                 this.cur_chosen_theme_tag = data.query_content.chosen_theme
                 this.cur_image_tag = data.query_content.img_tags
                 this.cur_author = data.query_content.author
-                console.log(this.cur_quote)
                 
                 // :: if we got a result from the api
                 if (data.result) {
+                  // :: end the loading gif because a responsse was obtained 
+                  this.loading = false
                   switch (data.result) {
                     case 'db_fail':
                       this.some_response = true
@@ -148,22 +143,15 @@ const app = Vue.createApp({
                     case 'insf_tokens':
                       this.some_response = true
                       this.error_message = 'no tokens left'
-                      this.loading = false
                       break
                     default:
                       this.some_response = true
-                      this.img_path = data.result
-                      this.dall_e_image = data.dall_e_image
+                      this.result = data.result
                       this.submissions_remaining = data.submissions_left
-                      this.loading = false
                       this.prompt_used = data.prompt_used
                       console.log('loading is turned off now :::::')
                       break
                   }
-
-                  // :: end the loading gif because a responsse was obtained 
-                  // this.loading = false
-
                 }
                 
               }
@@ -176,24 +164,29 @@ const app = Vue.createApp({
                 this.error_message = 'search query failed'
                 this.error_reason = data.reason
               }
-            // }
-
-
           }
         },
 
         methods : {
           search_keyword(kw) {
-            console.log('sending', kw)
-            console.log(this.submissions_remaining, this.img_tags, this.search_list_str)
-            this.feedSocket.send(JSON.stringify({
-              'message':kw
-            }))
-            this.loading = true
-            this.some_response = false
 
-            // :: start the loading gif
-            console.log('loading is true::::')
+              this.error_message = null
+
+              // console.log('sent the first one')
+              // submit to the consumer
+              // this.feedSocket.send(JSON.stringify({
+              //   'message':message
+              // })) 
+              console.log('sending', kw)
+              console.log(this.submissions_remaining, this.img_tags, this.search_list_str)
+              this.feedSocket.send(JSON.stringify({
+                'message':kw
+              }))
+              this.loading = true
+              this.some_response = false
+  
+              // :: start the loading gif
+              console.log('loading is true::::')
 
   
           },
@@ -201,13 +194,17 @@ const app = Vue.createApp({
             console.log('loading is set to True')
             this.loading = true
           },
-          addToOpenedExamples(index) {
-            console.log(index)
-            if (!this.opened_examples.includes(index)){
-              this.opened_examples.push(index);
+          addToOpenedExamples(index, book, quote) {
+            console.log(index, book, quote)
+            if (this.opened_example == index){
+              this.opened_example = null
+              this.item_book = null
+              this.item_quote = null
             }
-            else if (this.opened_examples.includes(index)){
-              this.opened_examples.splice(this.opened_examples.indexOf(index), 1);
+            else if (this.opened_example != index){
+              this.opened_example = index;
+              this.item_book = book
+              this.item_quote = quote
             }
           },
           clean_quote(quote_text){
@@ -236,11 +233,10 @@ app.mount('#app')
 
 
 // To do:
-// add wwaaaaaaay more image words
 // write tests 
-// Decouple and add more functions/ classses for everything
+// refresh the 5 pics (create a page actions py file and redo it upon clicks)
+// add button to show all tags toggle
+// some explanations about what is happeneng (i.e generate a quote + image from the themes below or search: )
 // make it look better
 // low priority - add options for Japanese language ones.
-// Add dynamic elements the carousel and the card.
-
-
+// 

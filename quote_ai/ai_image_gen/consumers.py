@@ -49,8 +49,7 @@ class FeedConsumer(WebsocketConsumer):
                 'type': 'DB_fail',
             }))
 
-    # def disconnect(self, close_code):
-    #     pass
+
 
     def receive(self, text_data):
 
@@ -98,19 +97,18 @@ class FeedConsumer(WebsocketConsumer):
             if submissions_check(session_submissions):  
                 promt_for_dall_e = f'create an an scene that contains the themes of {joined_img_tags} {salt}'
 
-                # test ones
-                test_path = 'testimage.jpeg'
-
                 session_submissions -= 1
                 self.scope["session"]['submissions'] = session_submissions
                 session_object['submissions'] = session_submissions
                 session_object.save()
 
+                test_path = 'asdfds'
 
                 # to check whether I will do paid request or just test it. 
                 if self.FULL_TEXT:
                     # Dall-E api call 
                     response = openai.Image.create(
+                        # prompt= 'simulate something that will be blocked by Dall E',
                         prompt= promt_for_dall_e,
                         n=1,
                         size="256x256",
@@ -120,15 +118,14 @@ class FeedConsumer(WebsocketConsumer):
 
 
                     dall_e_image = response["data"][0]["url"]
-                    # print('Image URL: ',dall_e_image)
+                    print('Image URL: ',dall_e_image)
                     # print('simulated succesful request')
                     self.send(text_data=json.dumps({
                         'source' : 'search',
                         'message' : img_tags,
-                        'result' : test_path,
+                        'result' : dall_e_image,
                         'submissions_left' : session_submissions,
                         'query_content' : info_from_db,
-                        'dall_e_image' : dall_e_image,
                         'prompt_used' : promt_for_dall_e,
 
                     }))
@@ -159,16 +156,18 @@ class FeedConsumer(WebsocketConsumer):
        
         # if db search was unsuccessful
         except Exception as e:
-            print(e)
+            print('error is :',e)
             print('DB query failure')
             self.send(text_data=json.dumps({
                 'source' : 'fail',
-                'reason' : e,
+                'reason' : str(e),
             }))
+            print('sldjfjhakl;djfalsdj')
             
         
         
-
+    def disconnect(self, close_code):
+        pass
 
 
 
