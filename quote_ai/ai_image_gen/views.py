@@ -19,11 +19,11 @@ def check_submissions_or_create(req):
 class Home_page(View):
     def get(self,request):
 
-        # getting the 5 random images for carousel
+        # getting the 5 random images for carousel.  
         images = DB_interactions.get_saved_images()
         print('the 5 random images are :',images)
 
-        submissions = check_submissions_or_create(req=request)
+        submissions = check_submissions_or_create(req=request) 
 
         # populating the initial set of themes under the search bar
         theme_tags_for_search = DB_interactions.tags.all()
@@ -36,4 +36,5 @@ class Home_page(View):
             'theme_tags_results_list': theme_tags_for_search,
             'sumbissions_so_far' : submissions,
             'carousel_images': images,
+
             })

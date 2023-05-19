@@ -33,14 +33,26 @@
             </form>
             <div class="mt-2 mb-2">
                 <p v-if="search" :class="{ n_found: !includes, found: includes,  }" class="standard_text"> $[search]</p>
-                <p class="standard_text" v-else>Start searching</p>
+                <p class="standard_text" v-else>Search for a theme</p>
             </div>
 
-            <div class="container mt-5" style="height:100px">
-                <div v-if="filtered_lists">
+            <div class="container mt-5" >
+            
+            <button @click="full_list_allowed = !full_list_allowed" class="not_mobile btn-light btn my-2"> Show all </button>
+                <div v-if="full_list_allowed" class="mb-2 full_list_height" >
                     <div class="row justify-content-md-center ">
-                        <div v-for="tag in filtered_lists.slice(0,5)" class="d-flex col-md-2 card  mx-2">
-                            <a @click="search_keyword(tag)" class="btn-primary " style="text-transform: capitalize; text-decoration: none;">
+                        <div v-for="tag in filtered_lists" class="d-flex col-md-2 card  mb-1 mx-2">
+                            <a @click="search_keyword(tag)" class="btn " style="text-transform: capitalize; text-decoration: none;">
+                                $[tag]
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div v-else-if="filtered_lists" class="short_list_height" >
+                    <div class="row justify-content-md-center ">
+                        <div v-for="tag in filtered_lists.slice(0,5)" class="d-flex col-md-2 card button_row  mx-2">
+                            <a @click="search_keyword(tag)" class="btn tags" style="text-transform: capitalize; text-decoration: none;">
                                 $[tag]
                             </a>
                         </div>
@@ -66,18 +78,16 @@
                 </div>
 
                 <div v-else>
-                    <div  v-if="result">
-                        <img class='border m-2' :src="result">
+                    <div  v-if="dall_e_image">
+                        <img class='border m-2' :src="dall_e_image">
                         <div>
-                            <a :href='result' class="dall_url"> Generated image </a>
+                            <a :href='dall_e_image' class="dall_url"> Generated image </a>
                         </div>
                     </div>
                     <div v-else  class="mb-5" >
                         <img src="{% static '/loading.gif' %}">
                     </div>
-                    <!-- <img src="https://oaidalleapiprodscus.blob.core.windows.net/private/org-OqouMzKmPZrpejBBfCPRkGLo/user-YFH8KEPWsZGLg0quXyghK8w9/img-FRNFjtXqzorH75d0jZUjnHNt.png?st=2023-05-06T04%3A21%3A49Z&se=2023-05-06T06%3A21%3A49Z&sp=r&sv=2021-08-06&sr=b&rscd=inline&rsct=image/png&skoid=6aaadede-4fb3-4698-a8f6-684d7786b067&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2023-05-06T00%3A42%3A29Z&ske=2023-05-07T00%3A42%3A29Z&sks=b&skv=2021-08-06&sig=np2V7zDnvz/JGIIlB5zQnNCMTxEFHO/HzCY/KkAac2k%3D"> -->
 
-                    <p></p>
                 </div>
             </div>
         </div>
@@ -112,25 +122,25 @@
         <div class="row">
         {% for index, item in carousel_images|enumerate_list %}
             <div class="col-md-5 col-lg-2 col-sm-5 mx-auto g-0 " @click="addToOpenedExamples({{index}},`{{item.book}}`,`{{item.quote}}`)">
-                <div class="">
+                <div class="pic_row">
                     <div v-if="opened_example == {{index}}" class="" >
                         <img class="d-flex w-100 img_border" src="/{{item.image_url}}" alt="" >
                     </div>
                     <div  v-else="" class="hover_border">
-                        <img class="d-flex w-100 " src="/{{item.image_url}}" alt="" >
+                        <img class="d-flex w-100" src="/{{item.image_url}}" alt="" >
 
                     </div>
 
                 </div>       
                 
-                <div v-if="opened_example == {{index}}" class=" pb-1" style="background-color: white; ;">
+                <div v-if="opened_example == {{index}}" class=" pb-1 not_mobile" style="background-color: white; ;">
                         <p> - </p>
                     </div>
 
             </div>
         {% endfor %}
 
-        <div v-if="opened_example != null" >
+        <div class="not_mobile" v-if="opened_example != null" >
             <div  class="card text-center p-3 " style="margin-top: -2rem; border: none !important ;">
                     <p class="sub_heading"> $[item_book]</p>
                     <p v-html="item_quote" class="short_quote_text mt-2" ></p>

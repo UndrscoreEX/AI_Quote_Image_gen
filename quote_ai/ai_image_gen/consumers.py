@@ -31,6 +31,8 @@ class FeedConsumer(WebsocketConsumer):
         session_object = self.get_session_object()
         session_object.load()
 
+        images = DB_interactions.get_saved_images()
+        print('the 5 random images are :',images)
 
         # ::::: to give extra tokens upon hard refresh, use this:
         session_object['submissions'] = 5
@@ -41,6 +43,7 @@ class FeedConsumer(WebsocketConsumer):
             all_theme_tags = [x.name for x in DB_interactions.tags.all()]
             self.send(text_data=json.dumps({
                 'type': 'DB_Success',
+                'result' : 'initial DB setup',
                 'message': all_theme_tags,
                 'submissions_left' : session_submissions
             }))
@@ -63,6 +66,7 @@ class FeedConsumer(WebsocketConsumer):
         message = text_data_json['message']
 
         salt = DB_interactions.get_salt()
+
 
 
         try:
@@ -90,7 +94,8 @@ class FeedConsumer(WebsocketConsumer):
                 'book' : book,
                 'author' : author,
                 'img_tags' : joined_img_tags,
-                'quote': quote
+                'quote': quote,
+
             }
 
             # 　checks if there are enough tokens. 
@@ -102,7 +107,6 @@ class FeedConsumer(WebsocketConsumer):
                 session_object['submissions'] = session_submissions
                 session_object.save()
 
-                test_path = 'asdfds'
 
                 # to check whether I will do paid request or just test it. 
                 if self.FULL_TEXT:
@@ -121,7 +125,7 @@ class FeedConsumer(WebsocketConsumer):
                     print('Image URL: ',dall_e_image)
                     # print('simulated succesful request')
                     self.send(text_data=json.dumps({
-                        'source' : 'search',
+                        'type' : 'search',
                         'message' : img_tags,
                         'result' : dall_e_image,
                         'submissions_left' : session_submissions,
@@ -137,9 +141,9 @@ class FeedConsumer(WebsocketConsumer):
                 else:
                     print('simulated failed api request')
                     self.send(text_data=json.dumps({
-                        'source' : 'search',
+                        'type' : 'API_fail',
                         'message' : [x.name for x in img_tags_to_focus_on],
-                        'result' : 'db_fail',
+                        'result' : 'API_fail',
                         'query_content' : info_from_db
                 }))
                     
@@ -147,7 +151,7 @@ class FeedConsumer(WebsocketConsumer):
             else:
                 print('simulated failed request due to tokens')
                 self.send(text_data=json.dumps({
-                    'source' : 'search',
+                    'type' : 'insf_tokens',
                     'message' : [x.name for x in img_tags_to_focus_on],
                     'result' : 'insf_tokens',
                     'query_content' : info_from_db,
@@ -159,8 +163,8 @@ class FeedConsumer(WebsocketConsumer):
             print('error is :',e)
             print('DB query failure')
             self.send(text_data=json.dumps({
-                'source' : 'fail',
-                'reason' : str(e),
+                'type' : 'search_fail',
+                'result' : str(e),
             }))
             print('sldjfjhakl;djfalsdj')
             
