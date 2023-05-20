@@ -230,6 +230,5 @@ app.mount('#app')
 
 
 // To do:
-// write tests 
-// low priority - add options for Japanese language ones.
+// write tests for no tokens, broken image, api breaks 
 // 

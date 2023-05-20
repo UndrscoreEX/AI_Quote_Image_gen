@@ -14,7 +14,6 @@ class DB_interactions:
     @classmethod
     def get_salt(cls):
         salt = cls.salt.all()
-        # print(salt)
         salt = random.choice(salt)
         return salt
     
