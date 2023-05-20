@@ -231,6 +231,5 @@ app.mount('#app')
 
 // To do:
 // write tests 
-// make it look better
 // low priority - add options for Japanese language ones.
 // 

@@ -66,6 +66,7 @@ class FeedConsumer(WebsocketConsumer):
         message = text_data_json['message']
 
         salt = DB_interactions.get_salt()
+        print(salt)
 
 
 
@@ -115,7 +116,8 @@ class FeedConsumer(WebsocketConsumer):
                         # prompt= 'simulate something that will be blocked by Dall E',
                         prompt= promt_for_dall_e,
                         n=1,
-                        size="256x256",
+                        # size="256x256",
+                        size ='512x512',
                         # size="1024x1024",
                     )
 
@@ -133,10 +135,15 @@ class FeedConsumer(WebsocketConsumer):
                         'prompt_used' : promt_for_dall_e,
 
                     }))
+
+                    # :::: to save to db for the carousel
+
                     try:
                         DB_interactions.save_new_image(quote=random_option, url=dall_e_image, prompt_text=promt_for_dall_e)
                     except Exception as e:
                         print('image didnt save because ',e)
+
+
                 # if db search was successful but the api didn't give a successful image back 
                 else:
                     print('simulated failed api request')

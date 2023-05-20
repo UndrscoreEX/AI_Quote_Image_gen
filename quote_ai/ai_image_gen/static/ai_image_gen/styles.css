@@ -1,6 +1,11 @@
 body {
     background-color: rgb(61, 57, 57);
-    font-family:Georgia, 'Times New Roman', Times, serif;
+    font-family: 'Kanit', sans-serif;
+    /* font-family:Georgia, 'Times New Roman', Times, serif; */
+    background: rgb(2,0,36);
+    background: linear-gradient(170deg, rgba(2,0,36,1) 0%, rgba(43,2,48,1) 20%, rgba(42,8,106,1) 100%);
+    background-repeat: no-repeat;
+    background-attachment: fixed;
 }
 
 .title {
@@ -39,10 +44,13 @@ p {
 .sub_text {
     color: rgb(115, 38, 38);
     font-size: 0.8rem;
+    font-weight: 300;
 }
 
 .nav_additions {
-    background-color: rgb(255, 161, 161);
+    background-color: rgb(240, 138, 138);
+    border: white solid;
+
 }
 .nav_additions p {
     color: white;
@@ -71,20 +79,6 @@ p {
     transform: translateX(100px);
   } */
 
-.overlay {
-/* position: fixed; */
-top:auto;
-/* left: 0; */
-width: 100%;
-height: 100%;
-justify-content: center;
-align-items: center;
-}
-
-.overlay-content {
-background-color: white;
-padding: 20px;
-}
 
 .short_quote_text {
     color: rgb(99, 93, 93);
@@ -107,6 +101,8 @@ padding: 20px;
 .short_list_height{
     height: 100;
 }
+
+
 
 @media screen and (max-width: 575px) {
     .not_mobile {
