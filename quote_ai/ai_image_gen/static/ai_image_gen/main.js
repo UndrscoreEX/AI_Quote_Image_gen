@@ -61,6 +61,9 @@ const app = Vue.createApp({
           // :: randomize the results
           this.filtered_lists = this.filtered_lists.sort(() => .5 - Math.random())
         },
+        // submissions_remaining(){
+        //   console.log('submissions left: ', this.submissions_remaining)
+        // }
         
       
       },
@@ -81,7 +84,7 @@ const app = Vue.createApp({
             }
 
             else{
-              console.log('not a valied term')
+              // console.log('not a valied term')
               this.error_message = 'Theme not available. Try another valid option'
               this.some_response = true
 
@@ -95,17 +98,18 @@ const app = Vue.createApp({
           // :: must be arrow function to get access to the vue object (this.)
           this.feedSocket.onmessage = (e)=> {
             data = JSON.parse(e.data)
-            console.log('websocket message',data)
+            // console.log('websocket message',data)
             
                 // :: if we got a result from the api
                 if (data.type) {
-                  console.log('found type',data.type)
+                  // console.log('found type',data.type)
                   // :: end the loading gif because a responsse was obtained 
                   this.loading = false
                   switch (data.type) {
                     case 'DB_Success':
                       this.submissions_remaining = data.submissions_left
-                      console.log('db_connection successful')
+                      // this.$set(this, 'submissions_remaining', data.submissions_left);
+                      // console.log('db_connection successful')
 
                       // :: populating the fields at the start
                       this.search_list = data.message
@@ -117,11 +121,11 @@ const app = Vue.createApp({
 
                     case 'DB_fail':
                       this.error_message = 'initial DB_connection failed'
-                      console.log('db_connection failed')
+                      // console.log('db_connection failed')
                       break
 
                     case 'search':
-                      console.log('received search')
+                      // console.log('received search')
                       this.some_response = true
                       
                       // :: Sanitizing the quote that I get from the DB to allow the <br> tags to take effect.
@@ -129,7 +133,7 @@ const app = Vue.createApp({
                       this.cur_quote = DOMPurify.sanitize(data.query_content.quote, {
                         ALLOWED_TAGS: ['br'],
                       });
-                      
+                      this.submissions_remaining = data.submissions_left
                       this.img_tags= data.message.join(', ')
                       this.cur_book = data.query_content.book
                       this.dall_e_image = data.result
@@ -162,11 +166,11 @@ const app = Vue.createApp({
                       this.error_reason = data.result
                       break
                     }
-                  console.log('loading is turned off now :::::')
+                  // console.log('loading is turned off now :::::')
                 }
-                else{
-                  console.log('no type?')
-                }                
+                // else{
+                //   console.log('no type?')
+                // }                
               }
         },
 
@@ -174,8 +178,8 @@ const app = Vue.createApp({
           search_keyword(kw) {
               this.full_list_allowed = false
               this.error_message = null
-              console.log('sending', kw)
-              console.log(this.submissions_remaining, this.img_tags, this.search_list_str)
+              // console.log('sending', kw)
+              // console.log(this.submissions_remaining, this.img_tags, this.search_list_str)
               this.feedSocket.send(JSON.stringify({
                 'message':kw
               }))
@@ -183,16 +187,16 @@ const app = Vue.createApp({
               this.some_response = false
   
               // :: start the loading gif
-              console.log('loading is true::::')
+              // console.log('loading is true::::')
 
   
           },
           start_loading() {
-            console.log('loading is set to True')
+            // console.log('loading is set to True')
             this.loading = true
           },
           addToOpenedExamples(index, book, quote) {
-            console.log(index, book, quote)
+            // console.log(index, book, quote)
             if (this.opened_example == index){
               this.opened_example = null
               this.item_book = null
