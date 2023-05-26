@@ -15,7 +15,7 @@ SECRET_KEY = os.environ['DJ_sec_key']
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['18.176.194.245','www.ai.underscore-ex.com','ai.underscore-ex.com']
 
 
 # Application definition

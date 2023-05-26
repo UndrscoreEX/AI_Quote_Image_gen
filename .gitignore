@@ -1,2 +1,3 @@
 venv/
 quote_ai/.profile   
+quote_ai/database_dump.sql
