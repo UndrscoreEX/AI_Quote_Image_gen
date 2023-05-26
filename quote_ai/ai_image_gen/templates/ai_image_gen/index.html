@@ -28,7 +28,7 @@
         <div class="pt-5 container mx-auto my-auto text-center">
             <h1 class="title move_animation">AI Image Generator</h1>
             <form id="form">
-                {{ csrf_validation }}
+                {% csrf_token %}
                 <input placeholder='try it out' type="text" v-model="search" name="search_bar">
 
             </form>
