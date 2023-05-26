@@ -7,11 +7,11 @@ const app = Vue.createApp({
         search : '',
         img_tags: null,
         filtered_lists : '',
+        full_list_allowed : false,
         loading: null,
         some_response: null,
         error_message : null,
         result : null,
-        img_path : null,
         submissions_remaining : null,
         response_content : null,
         feedSocket : null,
@@ -26,7 +26,10 @@ const app = Vue.createApp({
         toggle : false,
         error_reason : null,
         ready_to_send: false,
-        opened_examples : [],
+        opened_example : null,
+        item_book : null,
+        item_quote : null,
+
 
 
       }
@@ -58,6 +61,9 @@ const app = Vue.createApp({
           // :: randomize the results
           this.filtered_lists = this.filtered_lists.sort(() => .5 - Math.random())
         },
+        // submissions_remaining(){
+        //   console.log('submissions left: ', this.submissions_remaining)
+        // }
         
       
       },
@@ -78,7 +84,7 @@ const app = Vue.createApp({
             }
 
             else{
-              console.log('not a valied term')
+              // console.log('not a valied term')
               this.error_message = 'Theme not available. Try another valid option'
               this.some_response = true
 
@@ -92,92 +98,88 @@ const app = Vue.createApp({
           // :: must be arrow function to get access to the vue object (this.)
           this.feedSocket.onmessage = (e)=> {
             data = JSON.parse(e.data)
-            console.log('websocket message',data)
-
-            // :: initial connection:
-            // :: type field is only used/checked for DB success/fail control
-              if (data.type && data.type == 'DB_Success'){
-                this.submissions_remaining = data.submissions_left
-                console.log('db_connection successful')
-
-                // :: populating the fields at the start
-                this.search_list = data.message
-                this.search_list_str = ' '+data.message.join(' ')
-
-                // :: randomize the results
-                this.filtered_lists = data.message.sort(() => .5 - Math.random())
-
-              }
-              else if (data.type && data.type == 'DB_fail'){
-                this.error_message = 'initial DB_connection failed'
-                console.log('db_connection failed')
-              }
-
-            // :: on response from form request:
-            if (data.source && data.source == 'search'){
-                this.img_tags= data.message.join(', ')
-                this.cur_book = data.query_content.book
-
-                // :: Sanitizing the quote that I get from the DB to allow the <br> tags to take effect.
-                // :: connects with the v-html tag in the render
-                this.cur_quote = DOMPurify.sanitize(data.query_content.quote, {
-                  ALLOWED_TAGS: ['br'],
-                });
-
-                this.cur_theme_tag = data.query_content.all_themes
-                this.cur_chosen_theme_tag = data.query_content.chosen_theme
-                this.cur_image_tag = data.query_content.img_tags
-                this.cur_author = data.query_content.author
-                
+            // console.log('websocket message',data)
+            
                 // :: if we got a result from the api
-                if (data.result) {
+                if (data.type) {
+                  // console.log('found type',data.type)
                   // :: end the loading gif because a responsse was obtained 
                   this.loading = false
-                  switch (data.result) {
-                    case 'db_fail':
+                  switch (data.type) {
+                    case 'DB_Success':
+                      this.submissions_remaining = data.submissions_left
+                      // this.$set(this, 'submissions_remaining', data.submissions_left);
+                      // console.log('db_connection successful')
+
+                      // :: populating the fields at the start
+                      this.search_list = data.message
+                      this.search_list_str = ' '+data.message.join(' ')
+
+                      // :: randomize the results
+                      this.filtered_lists = data.message.sort(() => .5 - Math.random())
+                      break
+
+                    case 'DB_fail':
+                      this.error_message = 'initial DB_connection failed'
+                      // console.log('db_connection failed')
+                      break
+
+                    case 'search':
+                      // console.log('received search')
+                      this.some_response = true
+                      
+                      // :: Sanitizing the quote that I get from the DB to allow the <br> tags to take effect.
+                      // :: connects with the v-html tag in the render
+                      this.cur_quote = DOMPurify.sanitize(data.query_content.quote, {
+                        ALLOWED_TAGS: ['br'],
+                      });
+                      this.submissions_remaining = data.submissions_left
+                      this.img_tags= data.message.join(', ')
+                      this.cur_book = data.query_content.book
+                      this.dall_e_image = data.result
+                      this.prompt_used = data.prompt_used
+                      this.cur_theme_tag = data.query_content.all_themes
+                      this.cur_chosen_theme_tag = data.query_content.chosen_theme
+                      this.cur_image_tag = data.query_content.img_tags
+                      this.cur_author = data.query_content.author
+                      break
+
+                    case 'API_fail':
                       this.some_response = true
                       this.error_message = 'request failed'
                       break
+
                     case 'insf_tokens':
                       this.some_response = true
                       this.error_message = 'no tokens left'
                       break
-                    default:
+
+                    case 'search_fail':
                       this.some_response = true
-                      this.img_path = data.result
-                      this.dall_e_image = data.dall_e_image
-                      this.submissions_remaining = data.submissions_left
-                      this.prompt_used = data.prompt_used
-                      console.log('loading is turned off now :::::')
+                      this.error_message = 'Something went wrong'
                       break
-                  }
+
+                    default:
+                      this.loading = false
+                      this.some_response = true
+                      this.error_message = 'search query failed'
+                      this.error_reason = data.result
+                      break
+                    }
+                  // console.log('loading is turned off now :::::')
                 }
-                
+                // else{
+                //   console.log('no type?')
+                // }                
               }
-
-              // :: if internal DB search failed
-              else if (data.source && data.source == 'fail'){
-                this.loading = false
-                this.some_response = true
-
-                this.error_message = 'search query failed'
-                this.error_reason = data.reason
-              }
-          }
         },
 
         methods : {
           search_keyword(kw) {
-
+              this.full_list_allowed = false
               this.error_message = null
-
-              // console.log('sent the first one')
-              // submit to the consumer
-              // this.feedSocket.send(JSON.stringify({
-              //   'message':message
-              // })) 
-              console.log('sending', kw)
-              console.log(this.submissions_remaining, this.img_tags, this.search_list_str)
+              // console.log('sending', kw)
+              // console.log(this.submissions_remaining, this.img_tags, this.search_list_str)
               this.feedSocket.send(JSON.stringify({
                 'message':kw
               }))
@@ -185,21 +187,25 @@ const app = Vue.createApp({
               this.some_response = false
   
               // :: start the loading gif
-              console.log('loading is true::::')
+              // console.log('loading is true::::')
 
   
           },
           start_loading() {
-            console.log('loading is set to True')
+            // console.log('loading is set to True')
             this.loading = true
           },
-          addToOpenedExamples(index) {
-            console.log(index)
-            if (!this.opened_examples.includes(index)){
-              this.opened_examples.push(index);
+          addToOpenedExamples(index, book, quote) {
+            // console.log(index, book, quote)
+            if (this.opened_example == index){
+              this.opened_example = null
+              this.item_book = null
+              this.item_quote = null
             }
-            else if (this.opened_examples.includes(index)){
-              this.opened_examples.splice(this.opened_examples.indexOf(index), 1);
+            else if (this.opened_example != index){
+              this.opened_example = index;
+              this.item_book = book
+              this.item_quote = quote
             }
           },
           clean_quote(quote_text){
@@ -228,9 +234,5 @@ app.mount('#app')
 
 
 // To do:
-// write tests 
-// make it look better
-// low priority - add options for Japanese language ones.
-// Add dynamic elements the carousel and the card.
-// figure out why it wont sent send a socket when there is a banned api request.
-
+// write tests for no tokens, broken image, api breaks 
+// 
