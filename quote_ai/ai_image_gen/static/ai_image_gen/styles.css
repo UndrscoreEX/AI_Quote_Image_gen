@@ -86,10 +86,14 @@ p {
     font-style: italic;
 }
 .img_border {
-    border: 2px solid;
+    border: 1px solid;
     border-color: rgb(255, 136, 0);
 }
 
+.hover_border {
+    border: 2px solid ;
+    border-color: rgb(255, 255, 255);
+}
 .hover_border:hover {
     border: 2px solid ;
     border-color: rgb(243, 72, 72);
