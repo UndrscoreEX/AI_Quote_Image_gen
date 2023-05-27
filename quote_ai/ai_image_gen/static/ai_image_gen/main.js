@@ -1,4 +1,8 @@
+const port = 2020; 
 
+if (window.location.port !== String(port)) {
+  window.location.port = port;
+}
 const app = Vue.createApp({
     data() {
       return {
@@ -71,7 +75,7 @@ const app = Vue.createApp({
         
         // :: when vue is mounted
         mounted(){
-          let url = `ws://${window.location.host}/ws/socket-server/`
+          let url = `ws://${window.location.hostname}/ws/socket-server/`
           this.feedSocket = new WebSocket(url)     
 
           let form = document.getElementById('form')
