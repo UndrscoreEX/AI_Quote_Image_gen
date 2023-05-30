@@ -28,7 +28,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'ai_image_gen'
+    'ai_image_gen',
+    # 'channels'
 ]
 
 ASGI_APPLICATION = 'quote_ai.asgi.application'

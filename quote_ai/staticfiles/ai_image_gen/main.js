@@ -49,6 +49,7 @@ const app = Vue.createApp({
   
             else{
               this.includes = false
+              console.log('not found')
             }
 
           }
@@ -61,10 +62,6 @@ const app = Vue.createApp({
           // :: randomize the results
           this.filtered_lists = this.filtered_lists.sort(() => .5 - Math.random())
         },
-        // submissions_remaining(){
-        //   console.log('submissions left: ', this.submissions_remaining)
-        // }
-        
       
       },
         
@@ -108,15 +105,14 @@ const app = Vue.createApp({
                   switch (data.type) {
                     case 'DB_Success':
                       this.submissions_remaining = data.submissions_left
-                      // this.$set(this, 'submissions_remaining', data.submissions_left);
-                      // console.log('db_connection successful')
-
+                      
                       // :: populating the fields at the start
-                      this.search_list = data.message
-                      this.search_list_str = ' '+data.message.join(' ')
+                      temp = document.getElementById('initial_theme_tags').textContent.replace("']","").replace("['", "")
+                      this.search_list = temp.split("', '")
+                      this.search_list_str = this.search_list.join(' ')
 
                       // :: randomize the results
-                      this.filtered_lists = data.message.sort(() => .5 - Math.random())
+                      this.filtered_lists = this.search_list.sort(() => .5 - Math.random())
                       break
 
                     case 'DB_fail':
@@ -166,11 +162,7 @@ const app = Vue.createApp({
                       this.error_reason = data.result
                       break
                     }
-                  // console.log('loading is turned off now :::::')
                 }
-                // else{
-                //   console.log('no type?')
-                // }                
               }
         },
 
@@ -226,13 +218,3 @@ const app = Vue.createApp({
 
 app.config.compilerOptions.delimiters = ['$[', ']'];
 app.mount('#app')
-
-
-
-
-
-
-
-// To do:
-// write tests for no tokens, broken image, api breaks 
-// 

@@ -1,8 +1,6 @@
 import json
 from channels.generic.websocket import WebsocketConsumer
-from .db_interactions import DB_interactions , submissions_check
 import random
-from django.contrib.sessions.backends.db import SessionStore
 import openai
 import os
 openai.api_key = os.getenv('OPEN_AI_Secret_Key')
@@ -17,10 +15,10 @@ class FeedConsumer(WebsocketConsumer):
     def get_session_submissions(self):
         return self.scope["session"].get('submissions')
     
-    def get_session_object(self):
-        sess_key = self.scope["session"].session_key
-        session_object = SessionStore(session_key=sess_key)
-        return session_object
+    
+    def set_session_submissions(self, value):
+        self.scope['session']['submissions'] = value
+        self.scope['session'].save()
         
         
 
@@ -28,23 +26,12 @@ class FeedConsumer(WebsocketConsumer):
         self.accept()
         session_submissions = self.get_session_submissions()
 
-        session_object = self.get_session_object()
-        session_object.load()
-
-        images = DB_interactions.get_saved_images()
-        print('the 5 random images are :',images)
-
-        # ::::: to give extra tokens upon hard refresh, use this:
-        session_object['submissions'] = 5
-        session_object.save()
-
         # :::: This will not work if there is multiple servers. You will need to get a redis DB for a cache layer and query this each time. 
         try:
-            all_theme_tags = [x.name for x in DB_interactions.tags.all()]
+            # all_theme_tags = [x.name for x in DB_interactions.tags.all()]
             self.send(text_data=json.dumps({
                 'type': 'DB_Success',
                 'result' : 'initial DB setup',
-                'message': all_theme_tags,
                 'submissions_left' : session_submissions
             }))
         except:
@@ -55,11 +42,7 @@ class FeedConsumer(WebsocketConsumer):
 
 
     def receive(self, text_data):
-
-        session_object = self.get_session_object()
-        session_object.load()
-            
-
+        from .db_interactions import DB_interactions , submissions_check
         session_submissions = self.get_session_submissions()
 
         text_data_json = json.loads(text_data)
@@ -105,15 +88,16 @@ class FeedConsumer(WebsocketConsumer):
 
                 session_submissions -= 1
                 self.scope["session"]['submissions'] = session_submissions
-                session_object['submissions'] = session_submissions
-                session_object.save()
+
+
+                # Updates the new number of tokens 
+                self.set_session_submissions(session_submissions)
 
 
                 # to check whether I will do paid request or just test it. 
                 if self.FULL_TEXT:
                     # Dall-E api call 
                     response = openai.Image.create(
-                        # prompt= 'simulate something that will be blocked by Dall E',
                         prompt= promt_for_dall_e,
                         n=1,
                         # size="256x256",
@@ -136,8 +120,8 @@ class FeedConsumer(WebsocketConsumer):
 
                     }))
 
-                    # :::: to save to db for the carousel
 
+                    # :::: to save to db
                     # try:
                     #     DB_interactions.save_new_image(quote=random_option, url=dall_e_image, prompt_text=promt_for_dall_e)
                     # except Exception as e:

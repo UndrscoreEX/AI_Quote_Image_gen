@@ -1,6 +1,5 @@
-from .models import Quotes,Theme_tags,Image_tags,Book, Salt, Saved_images
 import random
-
+from .models import Theme_tags,Salt, Saved_images
 
 class DB_interactions:
     tags = Theme_tags.objects
@@ -17,10 +16,9 @@ class DB_interactions:
         salt = random.choice(salt)
         return salt
     
-    # from a time when I didn't know that Dall-E will invalidate the links. 
+    # from a time when I didn't know that Dall-E will invalidate the links after a while. 
     @classmethod
     def save_new_image(cls, quote, url, prompt_text):
-        # Saved_images.objects.create(quote=quote, ai_image_url=url, prompt=prompt_text)
         Saved_images.create_from_url(quote=quote,image_url=url, prompt=prompt_text)
 
     @classmethod
@@ -42,6 +40,8 @@ class DB_interactions:
         return saved_images_dict
 
 
+
+# This is here because I want to add a redis cache layer 
 def submissions_check(token):
     print(f'remaining tokens are : {token}')
     return token> 0
