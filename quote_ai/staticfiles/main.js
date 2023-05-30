@@ -1,10 +1,8 @@
-const port = 2020; 
+// const port = 2020; 
 
-if (window.location.port !== String(port)) {
-  window.location.port = port;
-}
-
-
+// if (window.location.port !== String(port)) {
+//   window.location.port = port;
+// }
 const app = Vue.createApp({
     data() {
       return {
