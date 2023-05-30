@@ -72,7 +72,7 @@ const app = Vue.createApp({
         
         // :: when vue is mounted
         mounted(){
-          let url = `ws://${window.location.host}/ws/socket-server/`
+          let url = `wss://${window.location.host}/ws/socket-server/`
           this.feedSocket = new WebSocket(url)     
 
           let form = document.getElementById('form')
