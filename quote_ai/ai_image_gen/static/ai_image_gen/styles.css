@@ -125,6 +125,22 @@ p {
     .tags {
         font-size: 1rem;
     }
+    .quote_text{
+        font-family: 'Times New Roman', Times, serif;
+        font-size: 1rem;
+
+    }
+
+    .small_screen{
+        margin-left: 1rem;
+        margin-right: 1rem;
+
+    }
+
+    .dall_e_image{
+        width: 100%;
+        margin-top: 10px;
+    }
 }
 @media screen and (min-width: 575px) and (max-width: 991px)  {
     .not_mobile {

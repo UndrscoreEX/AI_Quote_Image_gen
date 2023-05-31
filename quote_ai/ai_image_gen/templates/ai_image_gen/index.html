@@ -81,7 +81,7 @@
 
                 <div v-else>
                     <div  v-if="dall_e_image">
-                        <img class='border m-2' :src="dall_e_image">
+                        <img class='border m-2 dall_e_image' :src="dall_e_image">
                         <div>
                             <a :href='dall_e_image' class="dall_url"> Generated image </a>
                         </div>
@@ -97,7 +97,7 @@
         <div class="container mx-auto">
             <div v-if="cur_book">
                 <div class="card mx-auto w-75">
-                    <div>
+                    <div class="small_screen">
 
                         <div class="card-header">
                             <h1>
